@@ -1,12 +1,13 @@
-const ffi = require('ffi-napi');
-const Registry = require('winreg');
-const ref = require('ref-napi');
-const ArrayType = require('ref-array-napi');
-const CharArray = ArrayType('char');
-const LongArray = ArrayType('long');
-const FloatArray = ArrayType('float');
-const vmChannels = require('./vmChannels.js');
-const ioFuncs = require('./ioFuncs.js');
+import ffi from 'ffi-napi';
+import Registry from 'winreg';
+import ref from 'ref-napi';
+import ArrayType from 'ref-array-napi';
+import vmChannels from './vmChannels';
+import ioFuncs from './ioFuncs';
+import { VoicemeeterDefaultConfig, VoicemeeterType, InterfaceType } from './voicemeeterUtils';
+const CharArray = ArrayType(ref.types.char);
+const LongArray = ArrayType(ref.types.long);
+const FloatArray = ArrayType(ref.types.float);
 
 async function getDLLPath() {
   const regKey = new Registry({
@@ -15,19 +16,15 @@ async function getDLLPath() {
   });
   return new Promise(resolve => {
     regKey.values((err, items) => {
-      const unistallerPath = items.find(i => i.name === 'UninstallString').value;
-      const fileNameIndex = unistallerPath.lastIndexOf('\\');
-      resolve(unistallerPath.slice(0, fileNameIndex));
+      const uninstallerPath = items.find(i => i.name === 'UninstallString')?.value;
+      if (!uninstallerPath) {
+        throw new Error("Could not find Voicemeeter installation path");
+      }
+      const fileNameIndex = uninstallerPath.lastIndexOf('\\');
+      resolve(uninstallerPath.slice(0, fileNameIndex));
     });
   });
 }
-
-
-const {
-  VoicemeeterDefaultConfig,
-  VoicemeeterType,
-  InterfaceType
-} = require('./voicemeeterUtils');
 
 const isEmpty = function (object) {
   for (let key in object) {
@@ -37,7 +34,42 @@ const isEmpty = function (object) {
   return true;
 };
 
-let libvoicemeeter;
+interface VoiceMeeterLibrary {
+  VBVMR_Login(): string | number
+  VBVMR_Logout(): string | number
+  VBVMR_RunVoicemeeter(voicemeeterType: number): string | number
+
+  // typePtr: LongArray
+  VBVMR_GetVoicemeeterType(typePtr: ArrayType<unknown>): string | number
+  // typePtr: LongArray
+  VBVMR_GetVoicemeeterVersion(typePtr: ArrayType<unknown>): string | number
+
+  VBVMR_IsParametersDirty(): string | number
+  // hardwareIdPtr: CharArracy
+  // namePtr: FloatArray
+  VBVMR_GetParameterFloat(hardwareIdPtr: ArrayType<unknown>, namePtr: ArrayType<unknown>): string | number
+  // VBVMR_GetParameterStringA(): bigint
+
+  // script: CharArray
+  VBVMR_SetParameters(script: ArrayType<unknown>): string | number
+  VBVMR_Output_GetDeviceNumber(): string | number
+  // typePtr: LongArray
+  // namePtr: CharArray
+  // hardwareIdPtr: CharArracy
+  VBVMR_Output_GetDeviceDescA(deviceId: string | number, typePtr: ArrayType<unknown>, namePtr: ArrayType<unknown>, hardwareIdPtr: ArrayType<unknown>): string | number
+  VBVMR_Input_GetDeviceNumber(): string | number
+  // typePtr: LongArray
+  // namePtr: CharArray
+  // hardwareIdPtr: CharArracy
+  VBVMR_Input_GetDeviceDescA(deviceId: string | number, typePtr: ArrayType<unknown>, namePtr: ArrayType<unknown>, hardwareIdPtr: ArrayType<unknown>): string | number
+
+  // value: ref.alloc('float');
+  VBVMR_GetLevel(type: string | number, channel: string | number, value: ref.Pointer<unknown>): string | number
+  // buffer: new Buffer(1024);
+  VBVMR_GetMidiMessage(buffer: Buffer, size: string | number): string | number
+}
+
+let libvoicemeeter: VoiceMeeterLibrary;
 
 const voicemeeter = {
   isConnected: false,
@@ -104,8 +136,8 @@ const voicemeeter = {
         return VoicemeeterType.voicemeeterBanana;
       case 3:
         return VoicemeeterType.voicemetterPotato;
-      default: // unknow software
-        return VoicemeeterType.unknow
+      default: // unknown software
+        return VoicemeeterType.unknown
     }
 
   },
@@ -184,7 +216,7 @@ const voicemeeter = {
     }
   },
 
-  _sendRawParaneterScript(scriptString) {
+  _sendRawParameterScript(scriptString) {
     const script = new Buffer.alloc(scriptString.length + 1);
     script.fill(0);
     script.write(scriptString);

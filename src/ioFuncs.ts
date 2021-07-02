@@ -126,4 +126,4 @@ var ios = {
         DelayOn: { out: 'DelayOn', val: 'Delay.On' }
     }
 }
-module.exports = ios
+export = ios

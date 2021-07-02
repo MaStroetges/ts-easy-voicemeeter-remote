@@ -55,4 +55,4 @@ var channels = {
     0: {}
 }
 
-module.exports = channels;
+export = channels;

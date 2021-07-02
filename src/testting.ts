@@ -1,4 +1,6 @@
-const voicemeeter = require('./index.js');
+// const voicemeeter = require('./index.js');
+
+
 async function start() {
     try {
         await voicemeeter.init();
@@ -33,11 +35,8 @@ async function start() {
 start();
 
 
-async function Loop(params) {
+async function Loop() {
     console.log('MIDI', ' || ', voicemeeter.getMidi())
     console.log('Level', ' || ', voicemeeter.getLevelByID(3, 6))
-
-
-
     console.log('getAllParameter  || ', await voicemeeter.getAllParameter())
 }

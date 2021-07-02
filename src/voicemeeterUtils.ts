@@ -1,5 +1,5 @@
 
-const VoicemeeterDefaultConfig = { // key is VoicemeeterType
+const VoicemeeterDefaultConfigExport = { // key is VoicemeeterType
   0: {},
   1: {
     strips: [{
@@ -106,15 +106,21 @@ const VoicemeeterDefaultConfig = { // key is VoicemeeterType
   }
 }
 
-const VoicemeeterType = {
-  'unknow': 0,
+const VoicemeeterTypeExport = {
+  'unknown': 0,
   'voicemeeter': 1,
   'voicemeeterBanana': 2,
   'voicemetterPotato': 3
 }
-const InterfaceType = {
+
+const InterfaceTypeExport = {
   'strip': 0,
   'bus': 1,
 }
 
-module.exports = { VoicemeeterDefaultConfig, VoicemeeterType, InterfaceType };
+// export = { VoicemeeterDefaultConfig, VoicemeeterType, InterfaceType };
+
+export const
+  VoicemeeterDefaultConfig = VoicemeeterDefaultConfigExport,
+  VoicemeeterType = VoicemeeterTypeExport,
+  InterfaceType = InterfaceTypeExport;
