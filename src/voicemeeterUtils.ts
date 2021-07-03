@@ -17,8 +17,8 @@ export enum VoicemeeterType {
 };
 
 export enum InterfaceType {
-  strip = 0,
-  bus = 1,
+  strip = "strip",
+  bus = "bus",
 };
 
 export interface ioChannels {
@@ -36,7 +36,7 @@ export interface voicemeeterIO {
     name: string,
     inputs: ioChannels[],
     outputs: ioChannels[],
-}
+};
 
 export type stripParamName = 'mono' | 'mute' | 'solo' | 'mc' | 'gain' | 'pan_x' | 'pan_y' | 'Color_x' | 'Color_y' | 'fx_x' | 'fx_y' | 'Audibility' | 'comp' | 'gate' | 'Karaoke' | 'Limit' | 'EQGain1' | 'EQGain2' | 'EQGain3' | 'Label' | 'A1' | 'A2' | 'A3' | 'A4' | 'A5' | 'B1' | 'B2' | 'B3' | 'FadeTo' | 'FadeBy' | 'Reverb' | 'Delay' | 'Fx1' | 'Fx2' | 'PostReverb' | 'PostDelay' | 'PostFx1' | 'PostFx2'
 

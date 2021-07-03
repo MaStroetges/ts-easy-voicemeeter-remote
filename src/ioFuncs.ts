@@ -1,4 +1,9 @@
-var ios: {[index:string]:any} = {
+interface ioProperty {
+    out: string,
+    val: string,
+}
+
+const ios:Record<string, Record<string,ioProperty>> = {
     strip: {
         mono: { out: 'mono', val: 'mono' },
         mute: { out: 'mute', val: 'mute' },

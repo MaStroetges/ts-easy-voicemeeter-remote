@@ -31,33 +31,19 @@ interface VoiceMeeterLibrary {
   VBVMR_Logout(): string | number
   VBVMR_RunVoicemeeter(voicemeeterType: number): string | number
 
-  // typePtr: LongArray
   VBVMR_GetVoicemeeterType(typePtr: ref.Pointer<string | number>): string | number
-  // typePtr: LongArray
   VBVMR_GetVoicemeeterVersion(typePtr: ref.Pointer<string | number>): string | number
 
   VBVMR_IsParametersDirty(): string | number
-  // hardwareIdPtr: CharArracy
-  // namePtr: FloatArray
   VBVMR_GetParameterFloat(hardwareIdPtr: Buffer, namePtr: ref.Pointer<number>): string | number
-  // VBVMR_GetParameterStringA(): bigint
 
-  // script: CharArray
   VBVMR_SetParameters(script: Buffer): string | number
   VBVMR_Output_GetDeviceNumber(): string | number
-  // typePtr: LongArray
-  // namePtr: CharArray
-  // hardwareIdPtr: CharArracy
   VBVMR_Output_GetDeviceDescA(deviceId: string | number, typePtr: ref.Pointer<string | number>, namePtr: Buffer, hardwareIdPtr: Buffer): string | number
   VBVMR_Input_GetDeviceNumber(): string | number
-  // typePtr: LongArray
-  // namePtr: CharArray
-  // hardwareIdPtr: CharArracy
   VBVMR_Input_GetDeviceDescA(deviceId: string | number, typePtr: ref.Pointer<string | number>, namePtr: Buffer, hardwareIdPtr: Buffer): string | number
 
-  // value: ref.alloc('float');
   VBVMR_GetLevel(type: string | number, channel: string | number, value: ref.Pointer<number>): string | number
-  // buffer: new Buffer(1024);
   VBVMR_GetMidiMessage(buffer: Buffer, size: string | number): string | number
 }
 
@@ -68,7 +54,7 @@ interface deviceInfo {
 }
 
 interface inParam {
-  type: string,
+  type: InterfaceType,
   id: number,
   getVals: string[]
 }
@@ -76,7 +62,7 @@ interface inParam {
 interface outParam {
   // replace this index
   [index: string]:any,
-  type: string,
+  type: InterfaceType,
   id: number,
 }
 
@@ -263,28 +249,24 @@ class voicemeeter {
   // name will be one of the 'io' values in ioFuncs
   //   different for bus or stips
   // value could change, possibly a bool or number
-  private _setParameter(type: InterfaceType, name:string, id: number, value:boolean | number) {
-    const interfaceType = InterfaceType[type]
-
+  private _setParameter(type: InterfaceType, name:string, id: number, value:boolean | number | string) {
     if (typeof(value) === 'boolean') {
       value = value ? 1 : 0
     }
 
-    return this.sendRawParameterScript(`${interfaceType}[${id}].${name}=${value};`);
+    return this.sendRawParameterScript(`${type}[${id}].${name}=${value};`);
   }
 
-  public setStripParameter(name:stripParamName, id: number, value:boolean | number) {
-    // TODO: don't just use string 'strips'
-    if (this.voicemeeterConfig['strips'].findIndex(strip => strip.id === id) === -1) {
+  public setStripParameter(name:stripParamName, id: number, value:boolean | number | string) {
+    if (this.voicemeeterConfig.strips.findIndex(strip => strip.id === id) === -1) {
       throw `${InterfaceType[InterfaceType.strip]} ${id} not found`;
     }
 
     return this._setParameter(InterfaceType.strip, name, id, value);
   }
 
-  public setBusParameter(name:busParamName, id: number, value:boolean | number) {
-    // TODO: don't just use string 'buses'
-    if (this.voicemeeterConfig['buses'].findIndex(bus => bus.id === id) === -1) {
+  public setBusParameter(name:busParamName, id: number, value:boolean | number | string) {
+    if (this.voicemeeterConfig.buses.findIndex(bus => bus.id === id) === -1) {
       throw `${InterfaceType[InterfaceType.bus]} ${id} not found`;
     }
 
@@ -302,7 +284,6 @@ class voicemeeter {
   }
 
   public getMidi() {
-
     const buffer = Buffer.alloc(1024);
     handle(libvoicemeeter.VBVMR_GetMidiMessage(buffer, 1024));
     const unorg = Uint8Array.from(buffer);;
@@ -358,7 +339,6 @@ class voicemeeter {
       }
 
       this.voicemeeterConfig.strips.forEach(element => {
-        // var out = element
         let inP: inParam = {
           type: InterfaceType[InterfaceType.strip],
           id: element.id,
@@ -377,7 +357,7 @@ class voicemeeter {
 
       this.voicemeeterConfig.buses.forEach(element => {
         let inP: inParam = {
-          type: InterfaceType[InterfaceType.bus],
+          type: InterfaceType.bus,
           id: element.id,
           getVals: [],
         };
@@ -404,7 +384,7 @@ class voicemeeter {
 
       param.forEach(paramElement => {
         var out:outParam = {
-          type: paramElement.type.toLowerCase(),
+          type: paramElement.type,
           id: paramElement.id
         }
         if (paramElement.type.toLowerCase() == 'strip' || 'bus') {
@@ -434,35 +414,6 @@ class voicemeeter {
     return { name: ver.name, index: index, version: this.version }
   }
 }
-
-
-//Create setter function
-// const parameterStripNames = ['mono', 'solo', 'mute', 'gain', 'gate', 'comp'];
-// const parameterBusNames = ['mono', 'mute', 'gain'];
-
-// parameterBusNames.forEach(name => {
-//   const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
-
-//   voicemeeter[`setBus${capitalizedName}`] = function (busNumber, value) {
-//     if (typeof (value) === 'boolean') {
-//       voicemeeter._setParameter(InterfaceType.bus, name, busNumber, value ? '1' : '0')
-//     } else {
-//       voicemeeter._setParameter(InterfaceType.bus, name, busNumber, value)
-//     }
-//   }
-// });
-
-// parameterStripNames.forEach(name => {
-//   const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
-
-//   voicemeeter[`setStrip${capitalizedName}`] = function (stripNumber, value) {
-//     if (typeof (value) === 'boolean') {
-//       voicemeeter._setParameter(InterfaceType.strip, name, stripNumber, value ? '1' : '0')
-//     } else {
-//       voicemeeter._setParameter(InterfaceType.strip, name, stripNumber, value)
-//     }
-//   }
-// });
 
 function handle(res:string | number, shouldReturn: boolean = true) {
   if (res < 0 && res > -6) throw new Error(`${res}`); else if (shouldReturn) return Boolean(res);
