@@ -16,18 +16,18 @@ async function start() {
     console.log('Voicemeeter Info', vm.getVoicemeeterInfo());
 
     const test = await vm.getMultiParameter([
-      {type: InterfaceType.strip, id: 0, getVals: ['mono', 'Mute', 'solo', 'gain']},
-      {type: InterfaceType.bus, id: 0, getVals: ['Mono', 'mute', 'gain']},
+      {type: InterfaceType.strip, id: 0, getVals: ['mono', 'mute', 'solo', 'gain']},
+      {type: InterfaceType.bus, id: 0, getVals: ['mono', 'mute', 'gain', 'EQ.AB']},
     ]);
     console.log(test);
 
-    vm.setStripParameter('B1', 1, true);
+    // vm.setStripParameter('B1',g 1, true);
 
     setInterval(() => {
       if (vm.isParametersDirty()) {
         Loop(vm);
       }
-    }, 500);
+    }, 50);
   } catch (e) {
     console.log(e);
   }
@@ -38,5 +38,5 @@ start();
 async function Loop(vm: voicemeeter) {
   console.log('MIDI', ' || ', vm.getMidi());
   console.log('Level', ' || ', vm.getLevelByID(3, 6));
-  console.log('getAllParameter  || ', await vm.getAllParameter());
+  console.log('getAllParameter  || ', await (await vm.getAllParameter()).strips[2]);
 }

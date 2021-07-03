@@ -7,7 +7,7 @@ const vmChannels:Record<VoicemeeterType, voicemeeterIO> = {
     outputs: [],
   },
   1: {
-    name: 'VoiceMeeter',
+    name: 'Voicemeeter',
     inputs: [
       {l: 0, r: 1},
       {l: 2, r: 3},
@@ -20,7 +20,7 @@ const vmChannels:Record<VoicemeeterType, voicemeeterIO> = {
     ],
   },
   2: {
-    name: 'VoiceMeeter Banana',
+    name: 'Voicemeeter Banana',
     inputs: [
       {l: 0, r: 1},
       {l: 2, r: 3},
@@ -37,7 +37,7 @@ const vmChannels:Record<VoicemeeterType, voicemeeterIO> = {
     ],
   },
   3: {
-    name: 'VoiceMeeter Potato',
+    name: 'Voicemeeter Potato',
     inputs: [
       {l: 0, r: 1},
       {l: 2, r: 3},

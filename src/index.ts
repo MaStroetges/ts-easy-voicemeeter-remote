@@ -56,7 +56,7 @@ interface deviceInfo {
 interface inParam {
   type: InterfaceType,
   id: number,
-  getVals: string[]
+  getVals: stripParamName[] | busParamName[]
 }
 
 interface outParam {
@@ -66,14 +66,19 @@ interface outParam {
   id: number,
 }
 
+interface outParamData {
+  strips: outParam[],
+  buses: outParam[]
+}
+
 // TODO: Can this be in the voicemeeter class?
 let libvoicemeeter: VoicemeeterLibrary;
 
 export class voicemeeter {
-  private isConnected: boolean = false;
-  private isInitialised: boolean = false;
-  private outputDevices: deviceInfo[] = [];
-  private inputDevices: deviceInfo[] = [];
+  public isConnected: boolean = false;
+  public isInitialised: boolean = false;
+  public outputDevices: deviceInfo[] = [];
+  public inputDevices: deviceInfo[] = [];
   private channels = vmChannels;
   private type = VoicemeeterType.unknown;
   private version: string = '';
@@ -123,7 +128,9 @@ export class voicemeeter {
     hardwareIdPtr.write(parameterName);
     const namePtr = ref.alloc(ref.types.float).ref();
     libvoicemeeter.VBVMR_GetParameterFloat(hardwareIdPtr, namePtr);
-    return namePtr[0];
+    // TODO: Find out, must we use readFloatLE?
+    // return namePtr[0];
+    return namePtr.readFloatLE();
   }
 
   private _getVoicemeeterType() {
@@ -145,7 +152,6 @@ export class voicemeeter {
     }
   }
 
-  // This function is returning the incomplete version
   private _getVoicemeeterVersion() {
     // Pointer on 32bit integer receiving the version (v1.v2.v3.v4)
     // 				v1 = (version & 0xFF000000)>>24;
@@ -157,13 +163,11 @@ export class voicemeeter {
       throw 'running failed';
     }
 
-    // return value is `7`, should be `117440519`
-    // console.debug(versionPtr[0]);
-
-    const v4 = versionPtr[0] % Math.pow(2, 8);
-    const v3 = (versionPtr[0] - v4) % Math.pow(2, 16) / Math.pow(2, 8);
-    const v2 = ((versionPtr[0] - v3 * 256 - v4) % Math.pow(2, 24)) / Math.pow(2, 16);
-    const v1 = (versionPtr[0] - v2 * 512 - v3 * 256 - v4) / Math.pow(2, 24);
+    let fullVer = versionPtr.readInt32LE();
+    const v4 = fullVer % Math.pow(2, 8);
+    const v3 = (fullVer - v4) % Math.pow(2, 16) / Math.pow(2, 8);
+    const v2 = ((fullVer - v3 * 256 - v4) % Math.pow(2, 24)) / Math.pow(2, 16);
+    const v1 = (fullVer - v2 * 512 - v3 * 256 - v4) / Math.pow(2, 24);
 
     return `${v1}.${v2}.${v3}.${v4}`;
   }
@@ -277,7 +281,7 @@ export class voicemeeter {
     }
     const value = ref.alloc(ref.types.float).ref();
     handle(libvoicemeeter.VBVMR_GetLevel(type, channel, value));
-    return 20 * Math.log10(value[0]) + 60;
+    return 20 * Math.log10(value.readFloatLE()) + 60;
   }
 
   public getMidi() {
@@ -328,9 +332,9 @@ export class voicemeeter {
       return out;
     }
   }
-  public async getAllParameter() {
+  public async getAllParameter(): Promise<outParamData> {
     return new Promise((resolve, rejects) => {
-      const data = {
+      const data: outParamData = {
         strips: <outParam[]>[],
         buses: <outParam[]>[],
       };
