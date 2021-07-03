@@ -106,17 +106,17 @@ const VoicemeeterDefaultConfigExport = { // key is VoicemeeterType
   }
 }
 
-const VoicemeeterTypeExport = {
-  'unknown': 0,
-  'voicemeeter': 1,
-  'voicemeeterBanana': 2,
-  'voicemetterPotato': 3
-}
+enum VoicemeeterTypeExport {
+  unknown = 0,
+  voicemeeter = 1,
+  voicemeeterBanana = 2,
+  voicemetterPotato = 3
+};
 
-const InterfaceTypeExport = {
-  'strip': 0,
-  'bus': 1,
-}
+enum InterfaceTypeExport {
+  strip = 0,
+  bus = 1,
+};
 
 // export = { VoicemeeterDefaultConfig, VoicemeeterType, InterfaceType };
 
