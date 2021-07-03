@@ -1,4 +1,4 @@
-import voicemeeter from './index.js';
+import {voicemeeter} from './index.js';
 import {InterfaceType} from './voicemeeterUtils.js';
 
 
@@ -12,8 +12,8 @@ async function start() {
     // Update Device List
     vm.updateDeviceList();
 
-    // Get Voicemeeter Info  return { name: 'VoiceMeeter Potato', index: 3, version: '3.0.0.8' }
-    console.log('VoiceMeeter Info', vm.getVoicemeeterInfo());
+    // Get Voicemeeter Info  return { name: 'Voicemeeter Potato', index: 3, version: '3.0.0.8' }
+    console.log('Voicemeeter Info', vm.getVoicemeeterInfo());
 
     const test = await vm.getMultiParameter([
       {type: InterfaceType.strip, id: 0, getVals: ['mono', 'Mute', 'solo', 'gain']},

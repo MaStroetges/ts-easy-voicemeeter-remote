@@ -1,11 +1,13 @@
 {
-    "name": "easy-voicemeeter-remote",
+    "name": "ts-easy-voicemeeter-remote",
     "version": "1.0.0",
     "description": "A easy Node.js voicemeeter remote",
-    "main": "lib/index.js",
+    "types": "dist/index.d.ts",
+    "main": "dist/index.js",
+    "files": ["dist/*"],
     "contributors": [
         {
-            "name": "Steffen Reimann"
+            "name": "Jaggernaut"
         }
     ],
     "license": "MIT",
@@ -36,7 +38,8 @@
     },
     "scripts": {
         "eslint": "npx eslint src/* --fix",
-        "test": "node lib/testing.js",
-        "build": "tsc"
+        "test": "node dist/testing.js",
+        "build": "tsc",
+        "prepublish": "tsc"
     }
 }

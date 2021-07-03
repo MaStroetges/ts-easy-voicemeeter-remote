@@ -1,7 +1,8 @@
 import {voicemeeterConfig, VoicemeeterType} from './voicemeeterUtils';
 
-
-const voiceMeeterDefaultConfig:Record<VoicemeeterType, voicemeeterConfig> = {
+// TODO: Can these names be updated from the settings on voicemeeter?
+// e.g. "Speakers" instead of "Hardware output 1"
+const voicemeeterDefaultConfig:Record<VoicemeeterType, voicemeeterConfig> = {
   0: {
     strips: [],
     buses: [],
@@ -124,4 +125,4 @@ const voiceMeeterDefaultConfig:Record<VoicemeeterType, voicemeeterConfig> = {
   },
 };
 
-export = voiceMeeterDefaultConfig
+export = voicemeeterDefaultConfig

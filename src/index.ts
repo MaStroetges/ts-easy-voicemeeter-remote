@@ -26,7 +26,7 @@ async function getDLLPath() {
   });
 }
 
-interface VoiceMeeterLibrary {
+interface VoicemeeterLibrary {
   VBVMR_Login(): string | number
   VBVMR_Logout(): string | number
   VBVMR_RunVoicemeeter(voicemeeterType: number): string | number
@@ -60,23 +60,24 @@ interface inParam {
 }
 
 interface outParam {
-  // replace this index
+  // TODO: Can I replace this index
   [index: string]:any,
   type: InterfaceType,
   id: number,
 }
 
-let libvoicemeeter: VoiceMeeterLibrary;
+// TODO: Can this be in the voicemeeter class?
+let libvoicemeeter: VoicemeeterLibrary;
 
-class voicemeeter {
-  isConnected: boolean = false;
-  isInitialised: boolean = false;
-  outputDevices: deviceInfo[] = [];
-  inputDevices: deviceInfo[] = [];
-  channels = vmChannels;
-  type = VoicemeeterType.unknown;
-  version: string = '';
-  voicemeeterConfig: voicemeeterConfig = voicemeeterDefaultConfig[VoicemeeterType.unknown];
+export class voicemeeter {
+  private isConnected: boolean = false;
+  private isInitialised: boolean = false;
+  private outputDevices: deviceInfo[] = [];
+  private inputDevices: deviceInfo[] = [];
+  private channels = vmChannels;
+  private type = VoicemeeterType.unknown;
+  private version: string = '';
+  private voicemeeterConfig: voicemeeterConfig = voicemeeterDefaultConfig[VoicemeeterType.unknown];
 
   public async init(): Promise<void> {
     console.debug(await getDLLPath() + '/VoicemeeterRemote64.dll');
@@ -245,10 +246,6 @@ class voicemeeter {
     return libvoicemeeter.VBVMR_SetParameters(script);
   }
 
-  // TODO:
-  // name will be one of the 'io' values in ioFuncs
-  //   different for bus or stips
-  // value could change, possibly a bool or number
   private _setParameter(type: InterfaceType, name:string, id: number, value:boolean | number | string) {
     if (typeof(value) === 'boolean') {
       value = value ? 1 : 0;
@@ -297,7 +294,7 @@ class voicemeeter {
     index = index || 0;
     const out: ioChannels = {};
     const vmType = this._getVoicemeeterType();
-    const vmChannelsByType = vmChannels[vmType];
+    const vmChannelsByType = this.channels[vmType];
     if (!vmChannelsByType) {
       throw new Error('Invalid voicemeeter type');
     }
@@ -410,7 +407,7 @@ class voicemeeter {
 
   public getVoicemeeterInfo() {
     const index = this._getVoicemeeterType();
-    const ver:any = vmChannels[index];
+    const ver:any = this.channels[index];
     return {name: ver.name, index: index, version: this.version};
   }
 }
@@ -418,7 +415,4 @@ class voicemeeter {
 function handle(res:string | number, shouldReturn: boolean = true) {
   if (res < 0 && res > -6) throw new Error(`${res}`); else if (shouldReturn) return Boolean(res);
 }
-
-export = voicemeeter;
-
 
