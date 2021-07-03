@@ -51,7 +51,7 @@ export enum VoicemeeterType {
   unknown = 0,
   voicemeeter = 1,
   voicemeeterBanana = 2,
-  voicemetterPotato = 3
+  voicemeeterPotato = 3
 };
 
 export enum InterfaceType {
@@ -152,7 +152,7 @@ export class voicemeeter {
       case 2: // Voicemeeter Banana software
         return VoicemeeterType.voicemeeterBanana;
       case 3:
-        return VoicemeeterType.voicemetterPotato;
+        return VoicemeeterType.voicemeeterPotato;
       default: // unknown software
         return VoicemeeterType.unknown;
     }
