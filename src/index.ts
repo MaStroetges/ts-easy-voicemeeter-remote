@@ -66,12 +66,12 @@ export interface inParam {
   getVals: stripParamName[] | busParamName[]
 }
 
-export interface outParam {
-  // TODO: Can I replace this index
-  [index: string]:any,
-  type: InterfaceType,
-  id: number,
-}
+export type outParam = {
+  [index in stripParamName | busParamName]?: any;
+} & {
+  type: InterfaceType;
+  id: number;
+};
 
 export interface outParamData {
   strips: outParam[],
@@ -375,7 +375,7 @@ export class voicemeeter {
           const func = ioFuncs.strip[funcName];
           let val = this._getGetParamType(func)(`Strip[${element.id}].${func.val}`);
           if (typeof(val) != "string" || val) {
-            out[func.out] = val
+            out[func.out as stripParamName] = val
           }
         }
         data.strips.push(out);
@@ -396,7 +396,7 @@ export class voicemeeter {
           const func = ioFuncs.bus[funcName];
           let val = this._getGetParamType(func)(`Bus[${element.id}].${func.val}`);
           if (typeof(val) != "string" || val) {
-            out[func.out] = val
+            out[func.out as busParamName] = val
           }
         }
         data.buses.push(out);
@@ -404,9 +404,9 @@ export class voicemeeter {
       resolve(data);
     });
   }
-  public async getMultiParameter(param: inParam[]) {
+  public async getMultiParameter(param: inParam[]): Promise<outParamData> {
     return new Promise((resolve, rejects) => {
-      const data = {
+      const data:outParamData = {
         strips: <outParam[]>[],
         buses: <outParam[]>[],
       };
@@ -424,8 +424,8 @@ export class voicemeeter {
           try {
             const func = ioFuncs[paramElement.type][element.toLowerCase()];
             const val = this._getGetParamType(func)(`${paramElement.type}[${paramElement.id}].${func.val}`);
-            if (val) {
-              out[func.out] = val;
+            if (typeof(val) != "string" || val) {
+              out[func.out as (busParamName | stripParamName)] = val;
             }
           } catch (error) {
             console.log(error);
