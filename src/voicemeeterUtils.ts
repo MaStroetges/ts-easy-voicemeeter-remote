@@ -17,8 +17,8 @@ export enum VoicemeeterType {
 };
 
 export enum InterfaceType {
-  strip = "strip",
-  bus = "bus",
+  strip = 'strip',
+  bus = 'bus',
 };
 
 export interface ioChannels {
