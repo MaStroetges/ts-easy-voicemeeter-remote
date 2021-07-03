@@ -416,8 +416,7 @@ export class voicemeeter {
   }
 
   public getVoicemeeterInfo() {
-    const index = this._getVoicemeeterType();
-    return {name: this.channels[index].name, index: index, version: this.version};
+    return {name: this.channels[this.type].name, type: this.type, version: this.version};
   }
 }
 
