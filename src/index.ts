@@ -5,7 +5,7 @@ import ArrayType from 'ref-array-napi';
 import vmChannels from './vmChannels';
 import ioFuncs from './ioFuncs';
 import voicemeeterDefaultConfig from './voicemeeterConfig';
-import {ioChannels, voicemeeterConfig, stripParamName, busParamName, deviceInfo} from './voicemeeterUtils';
+import {ioProperty, ioChannels, voicemeeterConfig, stripParamName, busParamName, deviceInfo, voicemeeterGroupTypes} from './voicemeeterUtils';
 // TODO: Can this be replaced?
 const CharArray = ArrayType<number>(ref.types.char);
 
@@ -178,7 +178,7 @@ export class voicemeeter {
       throw 'running failed';
     }
 
-    let fullVer = versionPtr.readInt32LE();
+    const fullVer = versionPtr.readInt32LE();
     const v4 = fullVer % Math.pow(2, 8);
     const v3 = (fullVer - v4) % Math.pow(2, 16) / Math.pow(2, 8);
     const v2 = ((fullVer - v3 * 256 - v4) % Math.pow(2, 24)) / Math.pow(2, 16);
@@ -347,6 +347,12 @@ export class voicemeeter {
       return out;
     }
   }
+
+  private _getGetParamType(prop: ioProperty) {
+    const func = prop.type == 'float' ? this.getParameter : this.getStringParameter;
+    return func;
+  }
+
   public async getAllParameter(): Promise<outParamData> {
     return new Promise((resolve, rejects) => {
       const data: outParamData = {
@@ -363,12 +369,11 @@ export class voicemeeter {
         const out:outParam = {
           type: inP.type,
           id: element.id,
-          name: element.name
+          name: element.name,
         };
         for (const funcName in ioFuncs.strip) {
           const func = ioFuncs.strip[funcName];
-          let f = func.type == "float" ? this.getParameter : this.getStringParameter
-          out[func.out] = f(`Strip[${element.id}].${func.val}`);
+          out[func.out] = this._getGetParamType(func)(`Strip[${element.id}].${func.val}`);
         }
         data.strips.push(out);
       });
@@ -382,19 +387,17 @@ export class voicemeeter {
         const out:outParam = {
           type: inP.type,
           id: element.id,
-          name: element.name
+          name: element.name,
         };
         for (const funcName in ioFuncs.bus) {
           const func = ioFuncs.bus[funcName];
-          let f = func.type == "float" ? this.getParameter : this.getStringParameter
-          out[func.out] = f(`Bus[${element.id}].${func.val}`);
+          out[func.out] = this._getGetParamType(func)(`Bus[${element.id}].${func.val}`);
         }
         data.buses.push(out);
       });
       resolve(data);
     });
   }
-
   public async getMultiParameter(param: inParam[]) {
     return new Promise((resolve, rejects) => {
       const data = {
@@ -403,15 +406,21 @@ export class voicemeeter {
       };
 
       param.forEach((paramElement) => {
+        const t = paramElement.type == InterfaceType.strip ? voicemeeterGroupTypes.strips : voicemeeterGroupTypes.buses;
         const out:outParam = {
           type: paramElement.type,
           id: paramElement.id,
+          name: this.voicemeeterConfig[t][paramElement.id].name,
         };
+        // always include getting name val
+        paramElement.getVals.push('name');
         paramElement.getVals.forEach((element) => {
           try {
-            const func = ioFuncs[paramElement.type.toLowerCase()][element.toLowerCase()];
-            let f = func.type == "float" ? this.getParameter : this.getStringParameter
-            out[func.out] = f(`${paramElement.type.toLowerCase()}[${paramElement.id}].${func.val}`);
+            const func = ioFuncs[paramElement.type][element.toLowerCase()];
+            const val = this._getGetParamType(func)(`${paramElement.type}[${paramElement.id}].${func.val}`);
+            if (val) {
+              out[func.out] = val;
+            }
           } catch (error) {
             console.log(error);
           }

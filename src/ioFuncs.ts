@@ -1,12 +1,8 @@
-interface ioProperty {
-    out: string,
-    val: string,
-    type: 'float' | 'string'
-}
+import {ioProperty} from './voicemeeterUtils';
 
 const ios:Record<string, Record<string, ioProperty>> = {
   strip: {
-    'device.name': {out: 'name', val: 'device.name', type: 'string'},
+    name: {out: 'name', val: 'device.name', type: 'string'},
     mono: {out: 'mono', val: 'mono', type: 'float'},
     mute: {out: 'mute', val: 'mute', type: 'float'},
     solo: {out: 'solo', val: 'solo', type: 'float'},
@@ -47,7 +43,7 @@ const ios:Record<string, Record<string, ioProperty>> = {
     device: {out: 'device', val: 'device', type: 'float'},
   },
   bus: {
-    'device.name': {out: 'name', val: 'device.name', type: 'string'},
+    name: {out: 'name', val: 'device.name', type: 'string'},
     mono: {out: 'mono', val: 'mono', type: 'float'},
     mute: {out: 'mute', val: 'mute', type: 'float'},
     EQon: {out: 'EQon', val: 'EQ.on', type: 'float'},

@@ -8,22 +8,20 @@ async function start() {
     // Login into Voicemeeter
     vm.login();
 
-    console.debug("Before updateDeviceList");
+    console.debug('Before updateDeviceList');
     // Update Device List
     vm.updateDeviceList();
 
-    console.debug("Before geteVoicemeeterInfo");
-    // Get Voicemeeter Info  return { name: 'Voicemeeter Potato', index: 3, version: '3.0.0.8' }
+    console.debug('Before geteVoicemeeterInfo');
+    // Get Voicemeeter Info  return { name: 'Voicemeeter Potato', index: 3, version: '3.0.0.7' }
     console.debug('Voicemeeter Info', vm.getVoicemeeterInfo());
 
-    console.debug("before getMultiParameter");
+    console.debug('before getMultiParameter');
     const test = await vm.getMultiParameter([
-      {type: InterfaceType.strip, id: 0, getVals: ['device.name', 'mono', 'mute', 'solo', 'gain']},
-      {type: InterfaceType.bus, id: 0, getVals: ['device.name', 'mono', 'mute', 'gain']},
+      {type: InterfaceType.strip, id: 0, getVals: ['name', 'mono', 'mute', 'solo', 'gain']},
+      {type: InterfaceType.bus, id: 0, getVals: ['mono', 'mute', 'gain']},
     ]);
     console.log(test);
-
-    console.log(vm.getStringParameter("Bus[0].device.name"));
 
     // vm.setStripParameter('B1',g 1, true);
 
@@ -42,5 +40,5 @@ start();
 async function Loop(vm: voicemeeter) {
   console.log('MIDI', ' || ', vm.getMidi());
   console.log('Level', ' || ', vm.getLevelByID(3, 6));
-  console.log('getAllParameter  || ', await (await vm.getAllParameter()).strips[2]);
+  console.log('getAllParameter  || ', await vm.getAllParameter());
 }

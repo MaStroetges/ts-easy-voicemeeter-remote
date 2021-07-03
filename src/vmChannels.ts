@@ -1,5 +1,5 @@
 import {voicemeeterIO} from './voicemeeterUtils';
-import {VoicemeeterType} from './index'
+import {VoicemeeterType} from './index';
 
 const vmChannels:Record<VoicemeeterType, voicemeeterIO> = {
   0: {

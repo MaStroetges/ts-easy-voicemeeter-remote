@@ -1,5 +1,5 @@
 import {voicemeeterConfig} from './voicemeeterUtils';
-import {VoicemeeterType} from './index'
+import {VoicemeeterType} from './index';
 
 const voicemeeterDefaultConfig:Record<VoicemeeterType, voicemeeterConfig> = {
   0: {
