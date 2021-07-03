@@ -373,7 +373,10 @@ export class voicemeeter {
         };
         for (const funcName in ioFuncs.strip) {
           const func = ioFuncs.strip[funcName];
-          out[func.out] = this._getGetParamType(func)(`Strip[${element.id}].${func.val}`);
+          let val = this._getGetParamType(func)(`Strip[${element.id}].${func.val}`);
+          if (typeof(val) != "string" || val) {
+            out[func.out] = val
+          }
         }
         data.strips.push(out);
       });
@@ -391,7 +394,10 @@ export class voicemeeter {
         };
         for (const funcName in ioFuncs.bus) {
           const func = ioFuncs.bus[funcName];
-          out[func.out] = this._getGetParamType(func)(`Bus[${element.id}].${func.val}`);
+          let val = this._getGetParamType(func)(`Bus[${element.id}].${func.val}`);
+          if (typeof(val) != "string" || val) {
+            out[func.out] = val
+          }
         }
         data.buses.push(out);
       });
