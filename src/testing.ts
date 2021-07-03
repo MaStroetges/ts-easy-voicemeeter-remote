@@ -9,15 +9,18 @@ async function start() {
     // Login into Voicemeeter
     vm.login();
 
+    console.debug("Before updateDeviceList");
     // Update Device List
     vm.updateDeviceList();
 
+    console.debug("Before geteVoicemeeterInfo");
     // Get Voicemeeter Info  return { name: 'Voicemeeter Potato', index: 3, version: '3.0.0.8' }
-    console.log('Voicemeeter Info', vm.getVoicemeeterInfo());
+    console.debug('Voicemeeter Info', vm.getVoicemeeterInfo());
 
+    console.debug("before getMultiParameter");
     const test = await vm.getMultiParameter([
       {type: InterfaceType.strip, id: 0, getVals: ['mono', 'mute', 'solo', 'gain']},
-      {type: InterfaceType.bus, id: 0, getVals: ['mono', 'mute', 'gain', 'EQ.AB']},
+      {type: InterfaceType.bus, id: 0, getVals: ['mono', 'mute', 'gain']},
     ]);
     console.log(test);
 

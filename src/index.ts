@@ -140,7 +140,7 @@ export class voicemeeter {
       throw 'running failed';
     }
 
-    switch (typePtr[0]) {
+    switch (typePtr.readInt32LE()) {
       case 1: // Voicemeeter software
         return VoicemeeterType.voicemeeter;
       case 2: // Voicemeeter Banana software
@@ -221,7 +221,7 @@ export class voicemeeter {
       this.outputDevices.push({
         name: namePtr.toString().replace(/\x00+$/g, ''),
         hardwareId: hardwareIdPtr.toString().replace(/\x00+$/g, ''),
-        type: typePtr[0],
+        type: typePtr.readInt32LE(),
       });
     }
 
@@ -238,7 +238,7 @@ export class voicemeeter {
       this.inputDevices.push({
         name: namePtr.toString().replace(/\x00+$/g, ''),
         hardwareId: hardwareIdPtr.toString().replace(/\x00+$/g, ''),
-        type: typePtr[0],
+        type: typePtr.readInt32LE(),
       });
     }
   }
