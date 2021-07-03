@@ -62,7 +62,7 @@ var io = {
         'Delay.On'
     ]
 }
-var ios = {
+var ios: {[index:string]:any} = {
     strip: {
         mono: { out: 'mono', val: 'mono' },
         mute: { out: 'mute', val: 'mute' },
