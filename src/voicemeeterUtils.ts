@@ -1,135 +1,12 @@
-interface voicemeeterGroup {
+export interface voicemeeterGroup {
   id: number,
   name: string,
   isVirtual?: boolean;
 }
 
-interface voicemeeterConfig {
+export interface voicemeeterConfig {
   strips:voicemeeterGroup[],
   buses: voicemeeterGroup[],
-}
-
-const voiceMeeterDefaultConfig:Record<VoicemeeterType, voicemeeterConfig> = {
-  0: {
-    strips: [],
-    buses: []
-  },
-  1: {
-    strips: [{
-      id: 0,
-      name: "Hardware input 1"
-    }, {
-      id: 1,
-      name: "Hardware input 2"
-    }, {
-      id: 2,
-      name: "Voicemeeter VAIO",
-      isVirtual: true
-    }],
-    buses: [{
-      id: 0,
-      name: "Hardware output 1"
-    }, {
-      id: 1,
-      name: "Voicemeeter VAIO output"
-    }]
-  },
-  2: {
-    strips: [{
-      id: 0,
-      name: "Hardware input 1"
-    }, {
-      id: 1,
-      name: "Hardware input 2"
-    }, {
-      id: 2,
-      name: "Hardware input 3"
-    }, {
-      id: 3,
-      name: "Voicemeeter VAIO",
-      isVirtual: true
-    }, {
-      id: 4,
-      name: "Voicemeeter AUX",
-      isVirtual: true
-    }],
-    buses: [{
-      id: 0,
-      name: "Hardware output 1"
-    }, {
-      id: 1,
-      name: "Hardware output 2"
-    }, {
-      id: 2,
-      name: "Hardware output 3"
-    }, {
-      id: 3,
-      isVirtual: true,
-      name: "Voicemeeter VAIO output"
-    }, {
-      id: 4,
-      isVirtual: true,
-      name: "Voicemeeter VAIO Aux output"
-    }]
-  },
-  3: {
-    strips: [{
-      id: 0,
-      name: "Hardware input 1"
-    }, {
-      id: 1,
-      name: "Hardware input 2"
-    }, {
-      id: 2,
-      name: "Hardware input 3"
-    }, {
-      id: 3,
-      name: "Hardware input 4"
-    }, {
-      id: 4,
-      name: "Hardware input 5"
-    }, {
-      id: 5,
-      name: "Voicemeeter VAIO",
-      isVirtual: true
-    }, {
-      id: 6,
-      name: "Voicemeeter AUX",
-      isVirtual: true
-    }, {
-      id: 7,
-      name: "Voicemeeter VAIO 3",
-      isVirtual: true
-    }],
-    buses: [{
-      id: 0,
-      name: "Hardware output 1"
-    }, {
-      id: 1,
-      name: "Hardware output 2"
-    }, {
-      id: 2,
-      name: "Hardware output 3"
-    }, {
-      id: 3,
-      name: "Hardware output 4"
-    }, {
-      id: 4,
-      name: "Hardware output 5"
-    }, {
-      id: 5,
-      isVirtual: true,
-      name: "Voicemeeter VAIO output"
-    }, {
-      id: 6,
-      isVirtual: true,
-      name: "Voicemeeter VAIO Aux output"
-    }, {
-      id: 7,
-      isVirtual: true,
-      name: "Voicemeeter VAIO3 output"
-    }]
-  }
 }
 
 export enum VoicemeeterType {
@@ -161,5 +38,6 @@ export interface voicemeeterIO {
     outputs: ioChannels[],
 }
 
-export const
-  VoicemeeterDefaultConfig = voiceMeeterDefaultConfig
+export type stripParamName = 'mono' | 'mute' | 'solo' | 'mc' | 'gain' | 'pan_x' | 'pan_y' | 'Color_x' | 'Color_y' | 'fx_x' | 'fx_y' | 'Audibility' | 'comp' | 'gate' | 'Karaoke' | 'Limit' | 'EQGain1' | 'EQGain2' | 'EQGain3' | 'Label' | 'A1' | 'A2' | 'A3' | 'A4' | 'A5' | 'B1' | 'B2' | 'B3' | 'FadeTo' | 'FadeBy' | 'Reverb' | 'Delay' | 'Fx1' | 'Fx2' | 'PostReverb' | 'PostDelay' | 'PostFx1' | 'PostFx2'
+
+export type busParamName = 'mono' | 'mute' | 'EQ.on' | 'EQ.AB' | 'gain' | 'mode.normal' | 'mode.Amix' | 'mode.Bmix' | 'mode.Repeat' | 'mode.Composite' | 'mode.TVMix' | 'mode.UpMix21' | 'mode.UpMix41' | 'mode.UpMix61' | 'mode.CenterOnly' | 'mode.LFEOnly' | 'mode.RearOnly' | 'Reverb.On' | 'Delay.On'

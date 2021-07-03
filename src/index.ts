@@ -4,10 +4,10 @@ import ref from 'ref-napi';
 import ArrayType from 'ref-array-napi';
 import vmChannels from './vmChannels';
 import ioFuncs from './ioFuncs';
-import { VoicemeeterDefaultConfig, VoicemeeterType, InterfaceType, voicemeeterIO, ioChannels, voicemeeterConfig } from './voicemeeterUtils';
+import voicemeeterDefaultConfig from './voicemeeterConfig';
+import { VoicemeeterType, InterfaceType, voicemeeterIO, ioChannels, voicemeeterConfig, stripParamName, busParamName } from './voicemeeterUtils';
+// TODO: Can this be replaced?
 const CharArray = ArrayType<number>(ref.types.char);
-const LongArray = ArrayType(ref.types.long);
-const FloatArray = ArrayType(ref.types.float);
 
 async function getDLLPath() {
   const regKey = new Registry({
@@ -26,14 +26,6 @@ async function getDLLPath() {
   });
 }
 
-// const isEmpty = function (object) {
-//   for (let key in object) {
-//     if (object.hasOwnProperty(key))
-//       return false;
-//   }
-//   return true;
-// };
-
 interface VoiceMeeterLibrary {
   VBVMR_Login(): string | number
   VBVMR_Logout(): string | number
@@ -51,7 +43,7 @@ interface VoiceMeeterLibrary {
   // VBVMR_GetParameterStringA(): bigint
 
   // script: CharArray
-  VBVMR_SetParameters(script: ArrayType<unknown>): string | number
+  VBVMR_SetParameters(script: Buffer): string | number
   VBVMR_Output_GetDeviceNumber(): string | number
   // typePtr: LongArray
   // namePtr: CharArray
@@ -90,16 +82,17 @@ interface outParam {
 
 let libvoicemeeter: VoiceMeeterLibrary;
 
-const voicemeeter = {
-  isConnected: false,
-  isInitialised: false,
-  outputDevices: <deviceInfo[]>[],
-  inputDevices: <deviceInfo[]>[],
-  channels: vmChannels,
-  type: VoicemeeterType.unknown,
-  version: "",
-  voicemeeterConfig: voicemeeterConfig,
-  async init() {
+class voicemeeter {
+  isConnected: boolean = false;
+  isInitialised: boolean = false;
+  outputDevices: deviceInfo[] = [];
+  inputDevices: deviceInfo[] = [];
+  channels = vmChannels;
+  type = VoicemeeterType.unknown;
+  version: string = "";
+  voicemeeterConfig: voicemeeterConfig = voicemeeterDefaultConfig[VoicemeeterType.unknown];
+
+  public async init(): Promise<void> {
     console.debug(await getDLLPath() + '/VoicemeeterRemote64.dll');
     libvoicemeeter = ffi.Library(await getDLLPath() + '/VoicemeeterRemote64.dll', {
       'VBVMR_Login': ['long', []],
@@ -122,18 +115,20 @@ const voicemeeter = {
       'VBVMR_GetMidiMessage': ['long', ['pointer', 'long']],
     });
     this.isInitialised = true;
-  },
+  }
 
-  runvoicemeeter(voicemeeterType: number) {
+  public runvoicemeeter(voicemeeterType: number) {
     if (libvoicemeeter.VBVMR_RunVoicemeeter(voicemeeterType) === 0) {
       return;
     }
     throw "running failed";
-  },
-  isParametersDirty() {
+  }
+
+  public isParametersDirty() {
     return libvoicemeeter.VBVMR_IsParametersDirty();
-  },
-  getParameter(parameterName: string) {
+  }
+
+  public getParameter(parameterName: string) {
     if (!this.isConnected) {
       throw "Not connected ";
     }
@@ -142,8 +137,9 @@ const voicemeeter = {
     var namePtr = ref.alloc(ref.types.float).ref();
     libvoicemeeter.VBVMR_GetParameterFloat(hardwareIdPtr, namePtr);
     return namePtr[0]
-  },
-  _getVoicemeeterType() {
+  }
+
+  private _getVoicemeeterType() {
     let typePtr: ref.Pointer<string | number> = ref.alloc(ref.types.long).ref();
 
     if (libvoicemeeter.VBVMR_GetVoicemeeterType(typePtr) !== 0) {
@@ -160,9 +156,10 @@ const voicemeeter = {
       default: // unknown software
         return VoicemeeterType.unknown
     }
-  },
+  }
+
   // This function is returning the incomplete version
-  _getVoicemeeterVersion() {
+  private _getVoicemeeterVersion() {
     // Pointer on 32bit integer receiving the version (v1.v2.v3.v4)
 		// 				v1 = (version & 0xFF000000)>>24;
 		// 				v2 = (version & 0x00FF0000)>>16;
@@ -182,8 +179,9 @@ const voicemeeter = {
     const v1 = (versionPtr[0] - v2 * 512 - v3 * 256 - v4) / Math.pow(2, 24);
 
     return `${v1}.${v2}.${v3}.${v4}`;
-  },
-  login() {
+  }
+
+  public login() {
     if (!this.isInitialised) {
       throw "await the initialisation before login";
     }
@@ -194,13 +192,14 @@ const voicemeeter = {
       this.isConnected = true;
       this.type = this._getVoicemeeterType();
       this.version = this._getVoicemeeterVersion();
-      this.voicemeeterConfig = VoicemeeterDefaultConfig[this.type];
+      this.voicemeeterConfig = voicemeeterDefaultConfig[this.type];
       return;
     }
     this.isConnected = false;
     throw "Connection failed";
-  },
-  logout() {
+  }
+
+  public logout() {
     if (!this.isConnected) {
       throw "Not connected";
     }
@@ -209,8 +208,9 @@ const voicemeeter = {
       return;
     }
     throw "Logout failed";
-  },
-  updateDeviceList() {
+  }
+
+  public updateDeviceList() {
     if (!this.isConnected) {
       throw "Not connected ";
     }
@@ -250,58 +250,48 @@ const voicemeeter = {
         type: typePtr[0]
       })
     }
-  },
+  }
 
-  // _sendRawParameterScript(scriptString) {
-  //   const script = new Buffer.alloc(scriptString.length + 1);
-  //   script.fill(0);
-  //   script.write(scriptString);
-  //   return libvoicemeeter.VBVMR_SetParameters(script);
-  // },
-  // _setParameter(type, name, id, value) {
+  public sendRawParameterScript(scriptString:string) {
+    const script = Buffer.alloc(scriptString.length + 1);
+    script.fill(0);
+    script.write(scriptString);
+    return libvoicemeeter.VBVMR_SetParameters(script);
+  }
 
-  //   if (!this.isConnected) {
-  //     throw "Not connected ";
-  //   }
-  //   if (!this.voicemeeterConfig || isEmpty(this.voicemeeterConfig)) {
-  //     throw "Configuration error  ";
-  //   }
-  //   const interfaceType = type === InterfaceType.strip ? 'Strip' : 'Bus';
-  //   const voicemeeterConfigObject = type === InterfaceType.strip ? 'strips' : 'buses';
+  // TODO:
+  // name will be one of the 'io' values in ioFuncs
+  //   different for bus or stips
+  // value could change, possibly a bool or number
+  private _setParameter(type: InterfaceType, name:string, id: number, value:boolean | number) {
+    const interfaceType = InterfaceType[type]
 
-  //   if (this.voicemeeterConfig[voicemeeterConfigObject].findIndex(strip => strip.id === id) === -1) {
-  //     throw `${interfaceType} ${id} not found`;
-  //   }
+    if (typeof(value) === 'boolean') {
+      value = value ? 1 : 0
+    }
 
-  //   return this._sendRawParaneterScript(`${interfaceType}[${id}].${name}=${value};`);
-  // },
-  // _setParameters(parameters) {
+    return this.sendRawParameterScript(`${interfaceType}[${id}].${name}=${value};`);
+  }
 
-  //   if (!this.isConnected) {
-  //     throw "Not connected ";
-  //   }
-  //   if (!this.voicemeeterConfig || isEmpty(this.voicemeeterConfig)) {
-  //     throw "Configuration error  ";
-  //   }
+  public setStripParameter(name:stripParamName, id: number, value:boolean | number) {
+    // TODO: don't just use string 'strips'
+    if (this.voicemeeterConfig['strips'].findIndex(strip => strip.id === id) === -1) {
+      throw `${InterfaceType[InterfaceType.strip]} ${id} not found`;
+    }
 
-  //   if (!Array.isArray(parameters)) {
-  //     throw interfaceType + " not found";
-  //   }
+    return this._setParameter(InterfaceType.strip, name, id, value);
+  }
 
-  //   const script = parameters.map(p => {
-  //     const interfaceType = p.type === InterfaceType.strip ? 'Strip' : 'Bus';
-  //     const voicemeeterConfigObject = p.type === InterfaceType.strip ? 'strips' : 'buses';
+  public setBusParameter(name:busParamName, id: number, value:boolean | number) {
+    // TODO: don't just use string 'buses'
+    if (this.voicemeeterConfig['buses'].findIndex(bus => bus.id === id) === -1) {
+      throw `${InterfaceType[InterfaceType.bus]} ${id} not found`;
+    }
 
-  //     if (!this.voicemeeterConfig[voicemeeterConfigObject].find(strip => strip.id === p.id)) {
-  //       throw interfaceType + " not found";
-  //     }
-  //     return `${interfaceType}[${p.id}].${p.name}=${p.value};`;
-  //   }).join('\n');
+    return this._setParameter(InterfaceType.bus, name, id, value);
+  }
 
-  //   return this._sendRawParaneterScript(script);
-
-  // },
-  getLevel(type: number, channel: number | undefined) {
+  public getLevel(type: number, channel: number | undefined) {
     // TODO: rethink this
     if (!channel) {
       return;
@@ -309,8 +299,9 @@ const voicemeeter = {
     const value = ref.alloc(ref.types.float).ref();
     handle(libvoicemeeter.VBVMR_GetLevel(type, channel, value));
     return 20 * Math.log10(value[0]) + 60;
-  },
-  getMidi() {
+  }
+
+  public getMidi() {
 
     const buffer = Buffer.alloc(1024);
     handle(libvoicemeeter.VBVMR_GetMidiMessage(buffer, 1024));
@@ -318,8 +309,9 @@ const voicemeeter = {
     const org = [];
     for (let i = 0; i < unorg.length; i += 3) if (unorg[i]) org.push([unorg[i], unorg[i + 1], unorg[i + 2]]);
     return org;
-  },
-  getLevelByID(m:number, index:number) {
+  }
+
+  public getLevelByID(m:number, index:number) {
     var mode = m || 0
     index = index || 0
     var out: ioChannels = {}
@@ -328,66 +320,84 @@ const voicemeeter = {
     if (!vmChannelsByType) {
       throw new Error("Invalid voicemeeter type");
     }
-    //console.log(vmType)
-    //console.log(vmChannels)
-    //console.log(vmChannelsByType)
     if (mode == 3) {
       var outChannels = vmChannelsByType.outputs[index]
-      out.l = voicemeeter.getLevel(mode, outChannels.l)
-      out.r = voicemeeter.getLevel(mode, outChannels.r)
-      out.fc = voicemeeter.getLevel(mode, outChannels.fc)
-      out.lfe = voicemeeter.getLevel(mode, outChannels.lfe)
-      out.sl = voicemeeter.getLevel(mode, outChannels.sl)
-      out.sr = voicemeeter.getLevel(mode, outChannels.sr)
-      out.bl = voicemeeter.getLevel(mode, outChannels.bl)
-      out.br = voicemeeter.getLevel(mode, outChannels.br)
+      out.l = this.getLevel(mode, outChannels.l)
+      out.r = this.getLevel(mode, outChannels.r)
+      out.fc = this.getLevel(mode, outChannels.fc)
+      out.lfe = this.getLevel(mode, outChannels.lfe)
+      out.sl = this.getLevel(mode, outChannels.sl)
+      out.sr = this.getLevel(mode, outChannels.sr)
+      out.bl = this.getLevel(mode, outChannels.bl)
+      out.br = this.getLevel(mode, outChannels.br)
       return out
     } else if (mode == 0 || 1 || 2) {
       var inChannels = vmChannelsByType.inputs[index]
-      var inputs = voicemeeter.voicemeeterConfig.strips
+      var inputs = this.voicemeeterConfig.strips
       if (inputs[index].isVirtual) {
-        out.l = voicemeeter.getLevel(mode, inChannels.l)
-        out.r = voicemeeter.getLevel(mode, inChannels.r)
-        out.fc = voicemeeter.getLevel(mode, inChannels.fc)
-        out.lfe = voicemeeter.getLevel(mode, inChannels.lfe)
-        out.sl = voicemeeter.getLevel(mode, inChannels.sl)
-        out.sr = voicemeeter.getLevel(mode, inChannels.sr)
-        out.bl = voicemeeter.getLevel(mode, inChannels.bl)
-        out.br = voicemeeter.getLevel(mode, inChannels.br)
+        out.l = this.getLevel(mode, inChannels.l)
+        out.r = this.getLevel(mode, inChannels.r)
+        out.fc = this.getLevel(mode, inChannels.fc)
+        out.lfe = this.getLevel(mode, inChannels.lfe)
+        out.sl = this.getLevel(mode, inChannels.sl)
+        out.sr = this.getLevel(mode, inChannels.sr)
+        out.bl = this.getLevel(mode, inChannels.bl)
+        out.br = this.getLevel(mode, inChannels.br)
       } else {
-        out.l = voicemeeter.getLevel(mode, inChannels.l)
-        out.r = voicemeeter.getLevel(mode, inChannels.r)
+        out.l = this.getLevel(mode, inChannels.l)
+        out.r = this.getLevel(mode, inChannels.r)
       }
       return out
     }
-  },
-  // async getAllParameter() {
-  //   return new Promise((resolve, rejects) => {
-  //     var data = { inputs: [], outputs: [] }
-
-  //     voicemeeter.voicemeeterConfig.strips.forEach(element => {
-  //       var out = element
-  //       for (var funcName in ioFuncs.strip) {
-  //         var func = ioFuncs.strip[funcName]
-  //         out[func.out] = voicemeeter.getParameter(`Strip[${element.id}].${func.val}`)
-  //       }
-  //       data.inputs.push(out)
-  //     });
-
-  //     voicemeeter.voicemeeterConfig.buses.forEach(element => {
-  //       var out = element
-  //       for (var funcName in ioFuncs.bus) {
-  //         var func = ioFuncs.bus[funcName]
-  //         out[func.out] = voicemeeter.getParameter(`Bus[${element.id}].${func.val}`)
-  //       }
-  //       data.outputs.push(out)
-  //     });
-  //     resolve(data)
-  //   });
-  // },
-  async getMultiParameter(param: inParam[]) {
+  }
+  public async getAllParameter() {
     return new Promise((resolve, rejects) => {
-      var data = {
+      let data = {
+        strips: <outParam[]>[],
+        buses: <outParam[]>[]
+      }
+
+      this.voicemeeterConfig.strips.forEach(element => {
+        // var out = element
+        let inP: inParam = {
+          type: InterfaceType[InterfaceType.strip],
+          id: element.id,
+          getVals: [],
+        };
+        let out:outParam = {
+          type: inP.type,
+          id: element.id
+        };
+        for (var funcName in ioFuncs.strip) {
+          var func = ioFuncs.strip[funcName]
+          out[func.out] = this.getParameter(`Strip[${element.id}].${func.val}`)
+        }
+        data.strips.push(out)
+      });
+
+      this.voicemeeterConfig.buses.forEach(element => {
+        let inP: inParam = {
+          type: InterfaceType[InterfaceType.bus],
+          id: element.id,
+          getVals: [],
+        };
+        let out:outParam = {
+          type: inP.type,
+          id: element.id
+        };
+        for (var funcName in ioFuncs.bus) {
+          var func = ioFuncs.bus[funcName]
+          out[func.out] = this.getParameter(`Bus[${element.id}].${func.val}`)
+        }
+        data.buses.push(out)
+      });
+      resolve(data)
+    });
+  }
+
+  public async getMultiParameter(param: inParam[]) {
+    return new Promise((resolve, rejects) => {
+      let data = {
         strips: <outParam[]>[],
         buses: <outParam[]>[]
       }
@@ -401,10 +411,7 @@ const voicemeeter = {
           paramElement.getVals.forEach(element => {
             try {
               var func = ioFuncs[paramElement.type.toLowerCase()][element.toLowerCase()]
-              ///console.log(paramElement)
-              //console.log(element)
-              //console.log(func)
-              out[func.out] = voicemeeter.getParameter(`${paramElement.type.toLowerCase()}[${paramElement.id}].${func.val}`)
+              out[func.out] = this.getParameter(`${paramElement.type.toLowerCase()}[${paramElement.id}].${func.val}`)
             } catch (error) {
               console.log(error)
             }
@@ -419,8 +426,9 @@ const voicemeeter = {
       });
       resolve(data)
     });
-  },
-  getVoicemeeterInfo() {
+  }
+
+  public getVoicemeeterInfo() {
     var index = this._getVoicemeeterType()
     let ver:any = vmChannels[index]
     return { name: ver.name, index: index, version: this.version }
@@ -454,7 +462,6 @@ const voicemeeter = {
 //       voicemeeter._setParameter(InterfaceType.strip, name, stripNumber, value)
 //     }
 //   }
-
 // });
 
 function handle(res:string | number, shouldReturn: boolean = true) {
