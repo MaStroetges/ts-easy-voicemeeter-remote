@@ -1,6 +1,6 @@
 {
     "name": "easy-voicemeeter-remote",
-    "version": "0.0.3",
+    "version": "1.0.0",
     "description": "A easy Node.js voicemeeter remote",
     "main": "lib/index.js",
     "contributors": [
@@ -17,7 +17,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/steffenreimann/easy-voicemeeter-remote.git"
+        "url": "https://github.com/jaggernaut555/ts-easy-voicemeeter-remote.git"
     },
     "keywords": [
         "voicemeeter",

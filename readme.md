@@ -1,11 +1,11 @@
-# easy-voicemeeter-remote
+# ts-easy-voicemeeter-remote
 
-Voicemeeter-remote is a Node.js wrapper for the official voicemeeterRemote DLL available in the installation directory of [Voicemeeter][voicemeeter], [Voicemeeter banana][voicemeeter-banana], or [Voicemeeter potato][voicemeeter-potato]. More informations about the DLL is available [here](https://forum.vb-audio.com/viewtopic.php?f=8&t=346)
+ts-easy-voicemeeter-remote is a Node.js typescript wrapper for the official voicemeeterRemote DLL available in the installation directory of [Voicemeeter][voicemeeter], [Voicemeeter banana][voicemeeter-banana], or [Voicemeeter potato][voicemeeter-potato]. More informations about the DLL is available [here](https://forum.vb-audio.com/viewtopic.php?f=8&t=346)
 
 ### First install it
 
 ```sh
-npm install easy-voicemeeter-remote --save
+npm install ts-easy-voicemeeter-remote --save
 ```
 
 ### How to use it ?
@@ -107,6 +107,8 @@ console.log(voicemeeter.outputDevices);
 #### [danielhands008/voicemeeter-remote-potato-napi](https://github.com/DanielHands008/voicemeeter-remote-potato-napi) forked from [weeryan17/voicemeeter-remote](https://github.com/weeryan17/voicemeeter-remote)
 
 #### [steffenreimann/easy-voicemeeter-remote](https://github.com/steffenreimann/easy-voicemeeter-remote) forked from [DanielHands008/voicemeeter-remote-potato-napi](https://github.com/DanielHands008/voicemeeter-remote-potato-napi)
+
+#### [jaggernaut555/ts-easy-voicemeeter-remote](https://github.com/jaggernaut555/ts-easy-voicemeeter-remote) forked from [steffenreimann/easy-voicemeeter-remote](https://github.com/steffenreimann/easy-voicemeeter-remote)
 
 # License
 
