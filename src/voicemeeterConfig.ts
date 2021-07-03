@@ -1,4 +1,5 @@
-import {voicemeeterConfig, VoicemeeterType} from './voicemeeterUtils';
+import {voicemeeterConfig} from './voicemeeterUtils';
+import {VoicemeeterType} from './index'
 
 // TODO: Can these names be updated from the settings on voicemeeter?
 // e.g. "Speakers" instead of "Hardware output 1"

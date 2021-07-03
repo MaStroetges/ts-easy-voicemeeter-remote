@@ -5,7 +5,7 @@ import ArrayType from 'ref-array-napi';
 import vmChannels from './vmChannels';
 import ioFuncs from './ioFuncs';
 import voicemeeterDefaultConfig from './voicemeeterConfig';
-import {VoicemeeterType, InterfaceType, voicemeeterIO, ioChannels, voicemeeterConfig, stripParamName, busParamName, deviceInfo, outParamData, outParam, inParam} from './voicemeeterUtils';
+import {ioChannels, voicemeeterConfig, stripParamName, busParamName, deviceInfo} from './voicemeeterUtils';
 // TODO: Can this be replaced?
 const CharArray = ArrayType<number>(ref.types.char);
 
@@ -45,6 +45,36 @@ interface VoicemeeterLibrary {
 
   VBVMR_GetLevel(type: string | number, channel: string | number, value: ref.Pointer<number>): string | number
   VBVMR_GetMidiMessage(buffer: Buffer, size: string | number): string | number
+}
+
+export enum VoicemeeterType {
+  unknown = 0,
+  voicemeeter = 1,
+  voicemeeterBanana = 2,
+  voicemetterPotato = 3
+};
+
+export enum InterfaceType {
+  strip = 'strip',
+  bus = 'bus',
+};
+
+export interface inParam {
+  type: InterfaceType,
+  id: number,
+  getVals: stripParamName[] | busParamName[]
+}
+
+export interface outParam {
+  // TODO: Can I replace this index
+  [index: string]:any,
+  type: InterfaceType,
+  id: number,
+}
+
+export interface outParamData {
+  strips: outParam[],
+  buses: outParam[]
 }
 
 // TODO: Can this be in the voicemeeter class?
@@ -387,8 +417,7 @@ export class voicemeeter {
 
   public getVoicemeeterInfo() {
     const index = this._getVoicemeeterType();
-    const ver:any = this.channels[index];
-    return {name: ver.name, index: index, version: this.version};
+    return {name: this.channels[index].name, index: index, version: this.version};
   }
 }
 

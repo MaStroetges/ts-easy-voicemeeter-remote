@@ -1,5 +1,4 @@
-import {voicemeeter} from './index.js';
-import {InterfaceType} from './voicemeeterUtils.js';
+import {voicemeeter, InterfaceType} from './index.js';
 
 
 async function start() {

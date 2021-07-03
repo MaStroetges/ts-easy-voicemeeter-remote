@@ -9,18 +9,6 @@ export interface voicemeeterConfig {
   buses: voicemeeterGroup[],
 }
 
-export enum VoicemeeterType {
-  unknown = 0,
-  voicemeeter = 1,
-  voicemeeterBanana = 2,
-  voicemetterPotato = 3
-};
-
-export enum InterfaceType {
-  strip = 'strip',
-  bus = 'bus',
-};
-
 export interface ioChannels {
     l?: number,
     r?: number,
@@ -42,24 +30,6 @@ export interface deviceInfo {
   name: string,
   hardwareId: string,
   type: number | string
-}
-
-export interface inParam {
-  type: InterfaceType,
-  id: number,
-  getVals: stripParamName[] | busParamName[]
-}
-
-export interface outParam {
-  // TODO: Can I replace this index
-  [index: string]:any,
-  type: InterfaceType,
-  id: number,
-}
-
-export interface outParamData {
-  strips: outParam[],
-  buses: outParam[]
 }
 
 export type stripParamName = 'mono' | 'mute' | 'solo' | 'mc' | 'gain' | 'pan_x' | 'pan_y' | 'Color_x' | 'Color_y' | 'fx_x' | 'fx_y' | 'Audibility' | 'comp' | 'gate' | 'Karaoke' | 'Limit' | 'EQGain1' | 'EQGain2' | 'EQGain3' | 'Label' | 'A1' | 'A2' | 'A3' | 'A4' | 'A5' | 'B1' | 'B2' | 'B3' | 'FadeTo' | 'FadeBy' | 'Reverb' | 'Delay' | 'Fx1' | 'Fx2' | 'PostReverb' | 'PostDelay' | 'PostFx1' | 'PostFx2'
