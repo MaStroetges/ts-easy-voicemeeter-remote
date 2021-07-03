@@ -36,6 +36,7 @@ interface VoicemeeterLibrary {
 
   VBVMR_IsParametersDirty(): string | number
   VBVMR_GetParameterFloat(hardwareIdPtr: Buffer, namePtr: ref.Pointer<number>): string | number
+  VBVMR_GetParameterStringA(hardwareIdPtr: Buffer, namePtr: Buffer): string | number
 
   VBVMR_SetParameters(script: Buffer): string | number
   VBVMR_Output_GetDeviceNumber(): string | number
@@ -126,10 +127,18 @@ export class voicemeeter {
     return libvoicemeeter.VBVMR_IsParametersDirty();
   }
 
+  public getStringParameter(parameterName: string) {
+    const hardwareIdPtr = Buffer.alloc(parameterName.length + 1);
+    hardwareIdPtr.write(parameterName);
+    const namePtr = Buffer.alloc(512);
+    // const namePtr = ref.alloc(ref.types.float).ref();
+    libvoicemeeter.VBVMR_GetParameterStringA(hardwareIdPtr, namePtr);
+    // TODO: Find out, must we use readFloatLE?
+    // return namePtr[0];
+    return namePtr.toString().replace(/\x00+$/g, '');
+  }
+
   public getParameter(parameterName: string) {
-    if (!this.isConnected) {
-      throw 'Not connected ';
-    }
     const hardwareIdPtr = Buffer.alloc(parameterName.length + 1);
     hardwareIdPtr.write(parameterName);
     const namePtr = ref.alloc(ref.types.float).ref();
@@ -354,10 +363,12 @@ export class voicemeeter {
         const out:outParam = {
           type: inP.type,
           id: element.id,
+          name: element.name
         };
         for (const funcName in ioFuncs.strip) {
           const func = ioFuncs.strip[funcName];
-          out[func.out] = this.getParameter(`Strip[${element.id}].${func.val}`);
+          let f = func.type == "float" ? this.getParameter : this.getStringParameter
+          out[func.out] = f(`Strip[${element.id}].${func.val}`);
         }
         data.strips.push(out);
       });
@@ -371,10 +382,12 @@ export class voicemeeter {
         const out:outParam = {
           type: inP.type,
           id: element.id,
+          name: element.name
         };
         for (const funcName in ioFuncs.bus) {
           const func = ioFuncs.bus[funcName];
-          out[func.out] = this.getParameter(`Bus[${element.id}].${func.val}`);
+          let f = func.type == "float" ? this.getParameter : this.getStringParameter
+          out[func.out] = f(`Bus[${element.id}].${func.val}`);
         }
         data.buses.push(out);
       });
@@ -394,20 +407,19 @@ export class voicemeeter {
           type: paramElement.type,
           id: paramElement.id,
         };
-        if (paramElement.type.toLowerCase() == 'strip' || 'bus') {
-          paramElement.getVals.forEach((element) => {
-            try {
-              const func = ioFuncs[paramElement.type.toLowerCase()][element.toLowerCase()];
-              out[func.out] = this.getParameter(`${paramElement.type.toLowerCase()}[${paramElement.id}].${func.val}`);
-            } catch (error) {
-              console.log(error);
-            }
-          });
-        }
+        paramElement.getVals.forEach((element) => {
+          try {
+            const func = ioFuncs[paramElement.type.toLowerCase()][element.toLowerCase()];
+            let f = func.type == "float" ? this.getParameter : this.getStringParameter
+            out[func.out] = f(`${paramElement.type.toLowerCase()}[${paramElement.id}].${func.val}`);
+          } catch (error) {
+            console.log(error);
+          }
+        });
 
-        if (paramElement.type.toLowerCase() == 'strip') {
+        if (paramElement.type == InterfaceType.strip) {
           data.strips.push(out);
-        } else if (paramElement.type.toLowerCase() == 'bus') {
+        } else if (paramElement.type == InterfaceType.bus) {
           data.buses.push(out);
         }
       });

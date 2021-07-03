@@ -18,10 +18,12 @@ async function start() {
 
     console.debug("before getMultiParameter");
     const test = await vm.getMultiParameter([
-      {type: InterfaceType.strip, id: 0, getVals: ['mono', 'mute', 'solo', 'gain']},
-      {type: InterfaceType.bus, id: 0, getVals: ['mono', 'mute', 'gain']},
+      {type: InterfaceType.strip, id: 0, getVals: ['device.name', 'mono', 'mute', 'solo', 'gain']},
+      {type: InterfaceType.bus, id: 0, getVals: ['device.name', 'mono', 'mute', 'gain']},
     ]);
     console.log(test);
+
+    console.log(vm.getStringParameter("Bus[0].device.name"));
 
     // vm.setStripParameter('B1',g 1, true);
 
