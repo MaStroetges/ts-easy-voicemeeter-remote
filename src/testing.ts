@@ -3,7 +3,7 @@ import {voicemeeter, InterfaceType} from './index.js';
 
 async function start() {
   try {
-    const vm = new voicemeeter();
+    let vm = new voicemeeter();
     await vm.init();
     // Login into Voicemeeter
     vm.login();
@@ -25,11 +25,15 @@ async function start() {
 
     // vm.setStripParameter('B1',g 1, true);
 
-    setInterval(() => {
-      if (vm.isParametersDirty()) {
-        Loop(vm);
-      }
-    }, 50);
+    console.debug('before getMacroButtonStatus');
+    // vm.getMacroButtonStatus(1);
+    vm.toggleMacroButtonStatus(1);
+
+    // setInterval(() => {
+    //   // if (vm.isParametersDirty()) {
+    //   //   Loop(vm);
+    //   // }
+    // }, 5000);
   } catch (e) {
     console.log(e);
   }
@@ -38,7 +42,7 @@ async function start() {
 start();
 
 async function Loop(vm: voicemeeter) {
-  console.log('MIDI', ' || ', vm.getMidi());
-  console.log('Level', ' || ', vm.getLevelByID(3, 6));
-  console.log('getAllParameter  || ', await vm.getAllParameter());
+  // console.log('MIDI', ' || ', vm.getMidi());
+  // console.log('Level', ' || ', vm.getLevelByID(3, 6));
+  // console.log('getAllParameter  || ', await vm.getAllParameter());
 }

@@ -46,6 +46,10 @@ interface VoicemeeterLibrary {
 
   VBVMR_GetLevel(type: string | number, channel: string | number, value: ref.Pointer<number>): string | number
   VBVMR_GetMidiMessage(buffer: Buffer, size: string | number): string | number
+
+  VBVMR_MacroButton_IsDirty(): string | number
+  VBVMR_MacroButton_GetStatus(nuLogicalButton: number, pValue: ref.Pointer<number>, bitmode: number): string | number
+  VBVMR_MacroButton_SetStatus(nuLogicalButton: number, fValue: number, bitmode: number): string | number
 }
 
 export enum VoicemeeterType {
@@ -66,6 +70,8 @@ export interface inParam {
   getVals: stripParamName[] | busParamName[]
 }
 
+// TODO: is it possible to specify the type of each of these indexes?
+// They're MOSTLY numbers, but some have a chance of being a string I guess
 export type outParam = {
   [index in stripParamName | busParamName]?: any;
 } & {
@@ -112,6 +118,10 @@ export class voicemeeter {
       'VBVMR_Input_GetDeviceDescA': ['long', ['long', 'long *', CharArray, CharArray]],
       'VBVMR_GetLevel': ['long', ['long', 'long', 'float *']],
       'VBVMR_GetMidiMessage': ['long', ['pointer', 'long']],
+
+      'VBVMR_MacroButton_IsDirty': ['long',[]],
+      'VBVMR_MacroButton_GetStatus': ['long',['long', 'float *', 'long']],
+      'VBVMR_MacroButton_SetStatus': ['long',['long', 'float', 'long']],
     });
     this.isInitialised = true;
   }
@@ -445,8 +455,69 @@ export class voicemeeter {
   public getVoicemeeterInfo() {
     return {name: this.channels[this.type].name, type: this.type, version: this.version};
   }
+
+  public isMacroButtonDirty() {
+    // TODO: Throw errors based on return values.
+    // Could return true/false but would lose last nu logical button id
+    // Though if more than one has changed that value will be incomplete anyway
+    /*
+        0: no new status.
+				>0: last nu logical button status changed.
+				-1: error (unexpected)
+				-2: no server.
+    */
+    return libvoicemeeter.VBVMR_MacroButton_IsDirty();
+  }
+
+  public getMacroButtonStatus(index: number): number {
+    const pValue = ref.alloc(ref.types.float).ref();
+    // bitmode
+    // 0 = push or release
+    // 2 = change displayed state only
+    // 3 = change Trigger state
+    let res = libvoicemeeter.VBVMR_MacroButton_GetStatus(index, pValue,0);
+
+    /* TODO: Throw errors based on number.
+        0: OK (no error).
+				-1: error
+				-2: no server.
+				-3: unknown parameter
+				-5: structure mismatch
+    */
+    if (res < 0) {
+      throw 'Error getting macro button status'
+    }
+    return pValue.readFloatLE();
+  }
+
+  /**
+   *
+   * @param index The logical ID of the macro button
+   * @param value Button state 0 or 1
+   * @returns 0 = success
+   */
+  public setMacroButtonStatus(index: number, value: number) {
+    /* TODO: Throw errors based on number.
+        0: OK (no error).
+				-1: error
+				-2: no server.
+				-3: unknown parameter
+				-5: structure mismatch
+    */
+    return libvoicemeeter.VBVMR_MacroButton_SetStatus(index, value,0);
+  }
+
+  public toggleMacroButtonStatus(index: number) {
+    if (this.getMacroButtonStatus(index) == 1) {
+      return this.setMacroButtonStatus(index, 0);
+    }
+    else {
+      return this.setMacroButtonStatus(index, 1);
+    }
+  }
 }
 
+// TODO: remove this and throw errors correctly
 function handle(res:string | number, shouldReturn: boolean = true) {
   if (res < 0 && res > -6) throw new Error(`${res}`); else if (shouldReturn) return Boolean(res);
 }
