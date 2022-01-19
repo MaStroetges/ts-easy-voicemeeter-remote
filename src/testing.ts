@@ -17,17 +17,26 @@ async function start() {
     console.debug('Voicemeeter Info', vm.getVoicemeeterInfo());
 
     console.debug('before getMultiParameter');
-    const test = await vm.getMultiParameter([
-      {type: InterfaceType.strip, id: 0, getVals: ['name', 'mono', 'mute', 'solo', 'gain']},
+    const multiparam = await vm.getMultiParameter([
+      {type: InterfaceType.strip, id: 0, getVals: ['name', 'mono', 'mute', 'solo', 'gain', 'GainLayer[0]', 'A1', 'Label', 'Device']},
       {type: InterfaceType.bus, id: 0, getVals: ['mono', 'mute', 'gain']},
     ]);
-    console.log(test);
+    console.log(multiparam);
 
     // vm.setStripParameter('B1',g 1, true);
 
     console.debug('before getMacroButtonStatus');
-    // vm.getMacroButtonStatus(1);
-    vm.toggleMacroButtonStatus(1);
+    let macroStatus = vm.getMacroButtonStatus(1);
+    // vm.toggleMacroButtonStatus(1);
+    console.log(macroStatus)
+
+    // console.debug('before AllParameter');
+    // let allparam = await vm.getAllParameter();
+    // console.log(allparam);
+
+    // console.debug('before GetStringParam')
+    // let stringparam = await vm.getStringParameter('strip[0].gainLayer[0]');
+    // console.log(stringparam);
 
     // setInterval(() => {
     //   // if (vm.isParametersDirty()) {

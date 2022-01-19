@@ -432,7 +432,7 @@ export class voicemeeter {
         paramElement.getVals.push('name');
         paramElement.getVals.forEach((element) => {
           try {
-            const func = ioFuncs[paramElement.type][element.toLowerCase()];
+            const func = ioFuncs[paramElement.type][element];
             const val = this._getGetParamType(func)(`${paramElement.type}[${paramElement.id}].${func.val}`);
             if (typeof(val) != "string" || val) {
               out[func.out as (busParamName | stripParamName)] = val;
