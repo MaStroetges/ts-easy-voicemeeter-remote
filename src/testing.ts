@@ -1,9 +1,9 @@
-import {voicemeeter, InterfaceType} from './index.js';
+import {VoiceMeeter, InterfaceType} from './index.js';
 
 
 async function start() {
   try {
-    let vm = new voicemeeter();
+    let vm = new VoiceMeeter();
     await vm.init();
     // Login into Voicemeeter
     vm.login();
@@ -51,7 +51,7 @@ async function start() {
 
 start();
 
-async function Loop(vm: voicemeeter) {
+async function Loop(vm: VoiceMeeter) {
   // console.log('MIDI', ' || ', vm.getMidi());
   // console.log('Level', ' || ', vm.getLevelByID(3, 6));
   // console.log('getAllParameter  || ', await vm.getAllParameter());
