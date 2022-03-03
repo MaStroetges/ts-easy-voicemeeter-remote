@@ -553,4 +553,4 @@ function handle(res:string | number, shouldReturn: boolean = true) {
   if (res < 0 && res > -6) throw new Error(`${res}`); else if (shouldReturn) return Boolean(res);
 }
 
-export * from './errors';
+export { VoiceMeeterLoginError } from './errors';

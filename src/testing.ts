@@ -1,3 +1,4 @@
+import { VoiceMeeterLoginError } from './errors.js';
 import { VoiceMeeter, InterfaceType } from './index.js';
 
 async function start() {
@@ -47,7 +48,12 @@ async function start() {
     //   // }
     // }, 5000);
   } catch (e) {
-    console.log(e);
+    if (e instanceof VoiceMeeterLoginError) {
+      console.log("login error");
+    }
+    else {
+      console.log(e);
+    }
   }
 }
 
