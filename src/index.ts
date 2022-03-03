@@ -563,4 +563,4 @@ function handle(res: string | number, shouldReturn: boolean = true) {
 }
 
 export { VoiceMeeterLoginError } from './errors';
-export { VoiceMeeterInfo, StripParamName as stripParamName, BusParamName as busParamName, VoicemeeterGroup as voicemeeterGroup, IoChannels as ioChannels, VoicemeeterIO as voicemeeterIO, VoicemeeterGroupTypes as voicemeeterGroupTypes,  } from './voicemeeterUtils';
+export { VoiceMeeterInfo, StripParamName, BusParamName, VoicemeeterGroup, IoChannels, VoicemeeterIO, VoicemeeterGroupTypes } from './voicemeeterUtils';
