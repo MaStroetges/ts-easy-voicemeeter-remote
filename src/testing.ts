@@ -19,7 +19,7 @@ async function start() {
     console.debug('before getMultiParameter');
     const multiparam = await vm.getMultiParameter([
       {type: InterfaceType.strip, id: 0, getVals: ['name', 'mono', 'mute', 'solo', 'gain', 'GainLayer[0]', 'A1', 'Label', 'Device']},
-      {type: InterfaceType.bus, id: 0, getVals: ['mono', 'mute', 'gain']},
+      {type: InterfaceType.bus, id: 0, getVals: ['mono', 'mute', 'gain', 'Sel']},
     ]);
     console.log(multiparam);
 
@@ -43,6 +43,7 @@ async function start() {
     //   //   Loop(vm);
     //   // }
     // }, 5000);
+
   } catch (e) {
     console.log(e);
   }

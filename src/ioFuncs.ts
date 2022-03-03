@@ -72,6 +72,7 @@ const ios:Record<string, Record<string, ioProperty>> = {
     device: {out: 'device', val: 'device', type: 'float'},
     ReverbOn: {out: 'ReverbOn', val: 'Reverb.On', type: 'float'},
     DelayOn: {out: 'DelayOn', val: 'Delay.On', type: 'float'},
+    Sel: {out: 'Sel', val: 'Sel', type: 'float'}
   },
 };
 export = ios
