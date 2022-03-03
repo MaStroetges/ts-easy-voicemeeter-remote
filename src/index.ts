@@ -6,6 +6,7 @@ import vmChannels from './vmChannels';
 import ioFuncs from './ioFuncs';
 import voicemeeterDefaultConfig from './voicemeeterConfig';
 import {ioProperty, ioChannels, voicemeeterConfig, stripParamName, busParamName, deviceInfo, voicemeeterGroupTypes} from './voicemeeterUtils';
+import { VoiceMeeterLoginError } from './errors';
 // TODO: Can this be replaced?
 const CharArray = ArrayType<number>(ref.types.char);
 
@@ -215,16 +216,34 @@ export class VoiceMeeter {
     if (this.isConnected) {
       return;
     }
-    if (this.libvoicemeeter.VBVMR_Login() === 0) {
+    let loginState = this.libvoicemeeter.VBVMR_Login();
+    // 0 = no error
+    // 1 = connected but no application;
+    if (loginState == 0) {
       this.isConnected = true;
       this.type = this._getVoicemeeterType();
       this.version = this._getVoicemeeterVersion();
       this.voicemeeterConfig = voicemeeterDefaultConfig[this.type];
       return;
     }
+
     this.isConnected = false;
     console.debug(this);
-    throw 'Connection failed';
+    throw new VoiceMeeterLoginError(`Login failed with value ${loginState}`, loginState);
+  }
+
+  /** Test if we have an active connection to a running instance of voicemeeter */
+  public testConnection() {
+    let comError = this.libvoicemeeter.VBVMR_IsParametersDirty();
+
+    if (comError >= 0) {
+      this.isConnected = true;
+      this.type = this._getVoicemeeterType();
+      this.version = this._getVoicemeeterVersion();
+      this.voicemeeterConfig = voicemeeterDefaultConfig[this.type];
+    }
+
+    return comError >= 0;
   }
 
   public logout() {

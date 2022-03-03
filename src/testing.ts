@@ -1,12 +1,15 @@
-import {VoiceMeeter, InterfaceType} from './index.js';
-
+import { VoiceMeeter, InterfaceType } from './index.js';
 
 async function start() {
   try {
     let vm = new VoiceMeeter();
     await vm.init();
     // Login into Voicemeeter
+    console.log(vm.testConnection());
+
     vm.login();
+
+    console.log(vm.testConnection());
 
     console.debug('Before updateDeviceList');
     // Update Device List
@@ -18,8 +21,8 @@ async function start() {
 
     console.debug('before getMultiParameter');
     const multiparam = await vm.getMultiParameter([
-      {type: InterfaceType.strip, id: 0, getVals: ['name', 'mono', 'mute', 'solo', 'gain', 'GainLayer[0]', 'A1', 'Label', 'Device']},
-      {type: InterfaceType.bus, id: 0, getVals: ['mono', 'mute', 'gain', 'Sel']},
+      { type: InterfaceType.strip, id: 0, getVals: ['name', 'mono', 'mute', 'solo', 'gain', 'GainLayer[0]', 'A1', 'Label', 'Device'] },
+      { type: InterfaceType.bus, id: 0, getVals: ['mono', 'mute', 'gain', 'Sel'] },
     ]);
     console.log(multiparam);
 
@@ -43,7 +46,6 @@ async function start() {
     //   //   Loop(vm);
     //   // }
     // }, 5000);
-
   } catch (e) {
     console.log(e);
   }
