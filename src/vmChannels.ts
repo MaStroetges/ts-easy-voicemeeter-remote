@@ -1,7 +1,7 @@
-import {voicemeeterIO} from './voicemeeterUtils';
+import {VoicemeeterIO} from './voicemeeterUtils';
 import {VoicemeeterType} from './index';
 
-const vmChannels:Record<VoicemeeterType, voicemeeterIO> = {
+const vmChannels:Record<VoicemeeterType, VoicemeeterIO> = {
   0: {
     name: 'unknown',
     inputs: [],

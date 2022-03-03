@@ -5,7 +5,7 @@ import ArrayType from 'ref-array-napi';
 import vmChannels from './vmChannels';
 import ioFuncs from './ioFuncs';
 import voicemeeterDefaultConfig from './voicemeeterConfig';
-import {ioProperty, ioChannels, voicemeeterConfig, stripParamName, busParamName, deviceInfo, voicemeeterGroupTypes} from './voicemeeterUtils';
+import { IoProperty, IoChannels, VoicemeeterConfig, StripParamName, BusParamName, DeviceInfo, VoicemeeterGroupTypes, VoiceMeeterInfo } from './voicemeeterUtils';
 import { VoiceMeeterLoginError } from './errors';
 // TODO: Can this be replaced?
 const CharArray = ArrayType<number>(ref.types.char);
@@ -68,13 +68,13 @@ export enum InterfaceType {
 export interface inParam {
   type: InterfaceType,
   id: number,
-  getVals: stripParamName[] | busParamName[]
+  getVals: StripParamName[] | BusParamName[]
 }
 
 // TODO: is it possible to specify the type of each of these indexes?
 // They're MOSTLY numbers, but some have a chance of being a string I guess
 export type outParam = {
-  [index in stripParamName | busParamName]?: any;
+  [index in StripParamName | BusParamName]?: any;
 } & {
   type: InterfaceType;
   id: number;
@@ -88,12 +88,13 @@ export interface outParamData {
 export class VoiceMeeter {
   public isConnected: boolean = false;
   public isInitialised: boolean = false;
-  public outputDevices: deviceInfo[] = [];
-  public inputDevices: deviceInfo[] = [];
+  public isLoggedIn: boolean = false;
+  public outputDevices: DeviceInfo[] = [];
+  public inputDevices: DeviceInfo[] = [];
   private channels = vmChannels;
   private type = VoicemeeterType.unknown;
   private version: string = '';
-  private voicemeeterConfig: voicemeeterConfig = voicemeeterDefaultConfig[VoicemeeterType.unknown];
+  private voicemeeterConfig: VoicemeeterConfig = voicemeeterDefaultConfig[VoicemeeterType.unknown];
   private _libvoicemeeter: VoicemeeterLibrary | undefined;
 
   public get libvoicemeeter(): VoicemeeterLibrary {
@@ -131,9 +132,9 @@ export class VoiceMeeter {
       'VBVMR_GetLevel': ['long', ['long', 'long', 'float *']],
       'VBVMR_GetMidiMessage': ['long', ['pointer', 'long']],
 
-      'VBVMR_MacroButton_IsDirty': ['long',[]],
-      'VBVMR_MacroButton_GetStatus': ['long',['long', 'float *', 'long']],
-      'VBVMR_MacroButton_SetStatus': ['long',['long', 'float', 'long']],
+      'VBVMR_MacroButton_IsDirty': ['long', []],
+      'VBVMR_MacroButton_GetStatus': ['long', ['long', 'float *', 'long']],
+      'VBVMR_MacroButton_SetStatus': ['long', ['long', 'float', 'long']],
     });
     this.isInitialised = true;
   }
@@ -213,7 +214,7 @@ export class VoiceMeeter {
     if (!this.isInitialised) {
       throw 'await the initialisation before login';
     }
-    if (this.isConnected) {
+    if (this.isConnected || this.isLoggedIn) {
       return;
     }
     let loginState = this.libvoicemeeter.VBVMR_Login();
@@ -221,10 +222,14 @@ export class VoiceMeeter {
     // 1 = connected but no application;
     if (loginState == 0) {
       this.isConnected = true;
+      this.isLoggedIn = true;
       this.type = this._getVoicemeeterType();
       this.version = this._getVoicemeeterVersion();
       this.voicemeeterConfig = voicemeeterDefaultConfig[this.type];
       return;
+    }
+    if (loginState == 1) {
+      this.isLoggedIn = true;
     }
 
     this.isConnected = false;
@@ -247,11 +252,15 @@ export class VoiceMeeter {
   }
 
   public logout() {
+    if (!this.isLoggedIn) {
+      throw 'Not logged in';
+    }
     if (!this.isConnected) {
       throw 'Not connected';
     }
     if (this.libvoicemeeter.VBVMR_Logout() === 0) {
       this.isConnected = false;
+      this.isLoggedIn = false;
       return;
     }
     throw 'Logout failed';
@@ -299,22 +308,22 @@ export class VoiceMeeter {
     }
   }
 
-  public sendRawParameterScript(scriptString:string) {
+  public sendRawParameterScript(scriptString: string) {
     const script = Buffer.alloc(scriptString.length + 1);
     script.fill(0);
     script.write(scriptString);
     return this.libvoicemeeter.VBVMR_SetParameters(script);
   }
 
-  private _setParameter(type: InterfaceType, name:string, id: number, value:boolean | number | string) {
-    if (typeof(value) === 'boolean') {
+  private _setParameter(type: InterfaceType, name: string, id: number, value: boolean | number | string) {
+    if (typeof (value) === 'boolean') {
       value = value ? 1 : 0;
     }
 
     return this.sendRawParameterScript(`${type}[${id}].${name}=${value};`);
   }
 
-  public setStripParameter(name:stripParamName, id: number, value:boolean | number | string) {
+  public setStripParameter(name: StripParamName, id: number, value: boolean | number | string) {
     if (this.voicemeeterConfig.strips.findIndex((strip) => strip.id === id) === -1) {
       throw `${InterfaceType[InterfaceType.strip]} ${id} not found`;
     }
@@ -322,7 +331,7 @@ export class VoiceMeeter {
     return this._setParameter(InterfaceType.strip, name, id, value);
   }
 
-  public setBusParameter(name:busParamName, id: number, value:boolean | number | string) {
+  public setBusParameter(name: BusParamName, id: number, value: boolean | number | string) {
     if (this.voicemeeterConfig.buses.findIndex((bus) => bus.id === id) === -1) {
       throw `${InterfaceType[InterfaceType.bus]} ${id} not found`;
     }
@@ -343,16 +352,16 @@ export class VoiceMeeter {
   public getMidi() {
     const buffer = Buffer.alloc(1024);
     handle(this.libvoicemeeter.VBVMR_GetMidiMessage(buffer, 1024));
-    const unorg = Uint8Array.from(buffer); ;
+    const unorg = Uint8Array.from(buffer);;
     const org = [];
     for (let i = 0; i < unorg.length; i += 3) if (unorg[i]) org.push([unorg[i], unorg[i + 1], unorg[i + 2]]);
     return org;
   }
 
-  public getLevelByID(m:number, index:number) {
+  public getLevelByID(m: number, index: number) {
     const mode = m || 0;
     index = index || 0;
-    const out: ioChannels = {};
+    const out: IoChannels = {};
     const vmType = this._getVoicemeeterType();
     const vmChannelsByType = this.channels[vmType];
     if (!vmChannelsByType) {
@@ -389,7 +398,7 @@ export class VoiceMeeter {
     }
   }
 
-  private _getGetParamType(prop: ioProperty) {
+  private _getGetParamType(prop: IoProperty) {
     const func = prop.type == 'float' ? VoiceMeeter.getParameter : VoiceMeeter.getStringParameter;
     return func;
   }
@@ -407,7 +416,7 @@ export class VoiceMeeter {
           id: element.id,
           getVals: [],
         };
-        const out:outParam = {
+        const out: outParam = {
           type: inP.type,
           id: element.id,
           name: element.name,
@@ -415,8 +424,8 @@ export class VoiceMeeter {
         for (const funcName in ioFuncs.strip) {
           const func = ioFuncs.strip[funcName];
           let val = this._getGetParamType(func)(this, `Strip[${element.id}].${func.val}`);
-          if (typeof(val) != "string" || val) {
-            out[func.out as stripParamName] = val
+          if (typeof (val) != "string" || val) {
+            out[func.out as StripParamName] = val
           }
         }
         data.strips.push(out);
@@ -428,7 +437,7 @@ export class VoiceMeeter {
           id: element.id,
           getVals: [],
         };
-        const out:outParam = {
+        const out: outParam = {
           type: inP.type,
           id: element.id,
           name: element.name,
@@ -436,8 +445,8 @@ export class VoiceMeeter {
         for (const funcName in ioFuncs.bus) {
           const func = ioFuncs.bus[funcName];
           let val = this._getGetParamType(func)(this, `Bus[${element.id}].${func.val}`);
-          if (typeof(val) != "string" || val) {
-            out[func.out as busParamName] = val
+          if (typeof (val) != "string" || val) {
+            out[func.out as BusParamName] = val
           }
         }
         data.buses.push(out);
@@ -447,14 +456,14 @@ export class VoiceMeeter {
   }
   public async getMultiParameter(param: inParam[]): Promise<outParamData> {
     return new Promise((resolve, rejects) => {
-      const data:outParamData = {
+      const data: outParamData = {
         strips: <outParam[]>[],
         buses: <outParam[]>[],
       };
 
       param.forEach((paramElement) => {
-        const t = paramElement.type == InterfaceType.strip ? voicemeeterGroupTypes.strips : voicemeeterGroupTypes.buses;
-        const out:outParam = {
+        const t = paramElement.type == InterfaceType.strip ? VoicemeeterGroupTypes.strips : VoicemeeterGroupTypes.buses;
+        const out: outParam = {
           type: paramElement.type,
           id: paramElement.id,
           name: this.voicemeeterConfig[t][paramElement.id].name,
@@ -465,8 +474,8 @@ export class VoiceMeeter {
           try {
             const func = ioFuncs[paramElement.type][element];
             const val = this._getGetParamType(func)(this, `${paramElement.type}[${paramElement.id}].${func.val}`);
-            if (typeof(val) != "string" || val) {
-              out[func.out as (busParamName | stripParamName)] = val;
+            if (typeof (val) != "string" || val) {
+              out[func.out as (BusParamName | StripParamName)] = val;
             }
           } catch (error) {
             console.log(error);
@@ -483,8 +492,8 @@ export class VoiceMeeter {
     });
   }
 
-  public getVoicemeeterInfo() {
-    return {name: this.channels[this.type].name, type: this.type, version: this.version};
+  public getVoicemeeterInfo(): VoiceMeeterInfo {
+    return { name: this.channels[this.type].name, type: this.type, version: this.version };
   }
 
   public isMacroButtonDirty() {
@@ -493,9 +502,9 @@ export class VoiceMeeter {
     // Though if more than one has changed that value will be incomplete anyway
     /*
         0: no new status.
-				>0: last nu logical button status changed.
-				-1: error (unexpected)
-				-2: no server.
+        >0: last nu logical button status changed.
+        -1: error (unexpected)
+        -2: no server.
     */
     return this.libvoicemeeter.VBVMR_MacroButton_IsDirty();
   }
@@ -506,14 +515,14 @@ export class VoiceMeeter {
     // 0 = push or release
     // 2 = change displayed state only
     // 3 = change Trigger state
-    let res = this.libvoicemeeter.VBVMR_MacroButton_GetStatus(index, pValue,0);
+    let res = this.libvoicemeeter.VBVMR_MacroButton_GetStatus(index, pValue, 0);
 
     /* TODO: Throw errors based on number.
         0: OK (no error).
-				-1: error
-				-2: no server.
-				-3: unknown parameter
-				-5: structure mismatch
+        -1: error
+        -2: no server.
+        -3: unknown parameter
+        -5: structure mismatch
     */
     if (res < 0) {
       throw 'Error getting macro button status'
@@ -530,12 +539,12 @@ export class VoiceMeeter {
   public setMacroButtonStatus(index: number, value: number) {
     /* TODO: Throw errors based on number.
         0: OK (no error).
-				-1: error
-				-2: no server.
-				-3: unknown parameter
-				-5: structure mismatch
+        -1: error
+        -2: no server.
+        -3: unknown parameter
+        -5: structure mismatch
     */
-    return this.libvoicemeeter.VBVMR_MacroButton_SetStatus(index, value,0);
+    return this.libvoicemeeter.VBVMR_MacroButton_SetStatus(index, value, 0);
   }
 
   public toggleMacroButtonStatus(index: number) {
@@ -549,8 +558,9 @@ export class VoiceMeeter {
 }
 
 // TODO: remove this and throw errors correctly
-function handle(res:string | number, shouldReturn: boolean = true) {
+function handle(res: string | number, shouldReturn: boolean = true) {
   if (res < 0 && res > -6) throw new Error(`${res}`); else if (shouldReturn) return Boolean(res);
 }
 
 export { VoiceMeeterLoginError } from './errors';
+export { VoiceMeeterInfo, StripParamName as stripParamName, BusParamName as busParamName, VoicemeeterGroup as voicemeeterGroup, IoChannels as ioChannels, VoicemeeterIO as voicemeeterIO, VoicemeeterGroupTypes as voicemeeterGroupTypes,  } from './voicemeeterUtils';

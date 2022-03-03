@@ -1,6 +1,6 @@
-import {ioProperty} from './voicemeeterUtils';
+import {IoProperty} from './voicemeeterUtils';
 
-const ios:Record<string, Record<string, ioProperty>> = {
+const ios:Record<string, Record<string, IoProperty>> = {
   strip: {
     name: {out: 'name', val: 'device.name', type: 'string'},
     mono: {out: 'mono', val: 'mono', type: 'float'},

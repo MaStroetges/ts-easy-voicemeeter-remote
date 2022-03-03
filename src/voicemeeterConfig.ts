@@ -1,7 +1,7 @@
-import {voicemeeterConfig} from './voicemeeterUtils';
+import {VoicemeeterConfig} from './voicemeeterUtils';
 import {VoicemeeterType} from './index';
 
-const voicemeeterDefaultConfig:Record<VoicemeeterType, voicemeeterConfig> = {
+const voicemeeterDefaultConfig:Record<VoicemeeterType, VoicemeeterConfig> = {
   0: {
     strips: [],
     buses: [],
