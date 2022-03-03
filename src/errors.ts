@@ -4,5 +4,6 @@ export class VoiceMeeterLoginError extends Error {
         super(msg);
 
         this.returnValue = returnValue;
+        Object.setPrototypeOf(this, VoiceMeeterLoginError.prototype);
     }
 }
