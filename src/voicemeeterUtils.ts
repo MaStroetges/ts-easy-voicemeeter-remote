@@ -1,19 +1,19 @@
-import { VoicemeeterType } from "."
+import { VoiceMeeterType } from "."
 
-export enum VoicemeeterGroupTypes {
+export enum VoiceMeeterGroupTypes {
   strips = 'strips',
   buses = 'buses'
 }
 
-export interface VoicemeeterGroup {
+export interface VoiceMeeterGroup {
   id: number,
   name: string,
   isVirtual?: boolean;
 }
 
-export interface VoicemeeterConfig {
-  strips: VoicemeeterGroup[],
-  buses: VoicemeeterGroup[],
+export interface VoiceMeeterConfig {
+  strips: VoiceMeeterGroup[],
+  buses: VoiceMeeterGroup[],
 }
 
 export interface IoChannels {
@@ -27,7 +27,7 @@ export interface IoChannels {
     br?: number
 }
 
-export interface VoicemeeterIO {
+export interface VoiceMeeterIO {
     name: string,
     inputs: IoChannels[],
     outputs: IoChannels[],
@@ -51,6 +51,6 @@ export type BusParamName = 'name' | 'mono' | 'mute' | 'EQ.on' | 'EQ.AB' | 'gain'
 
 export interface VoiceMeeterInfo {
   name: string,
-  type: VoicemeeterType,
+  type: VoiceMeeterType,
   version: string,
 }

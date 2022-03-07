@@ -1,5 +1,5 @@
 import { VoiceMeeterLoginError } from './errors.js';
-import { VoiceMeeter, InterfaceType } from './index.js';
+import { VoiceMeeter, InterfaceType, VoiceMeeterType } from './index.js';
 
 async function start() {
   try {
@@ -7,6 +7,9 @@ async function start() {
     await vm.init();
     // Login into Voicemeeter
     console.log(vm.testConnection());
+    if (!vm.testConnection()) {
+      vm.runVoiceMeeter(VoiceMeeterType.voiceMeeterPotato);
+    }
 
     vm.login();
 
@@ -16,9 +19,9 @@ async function start() {
     // Update Device List
     vm.updateDeviceList();
 
-    console.debug('Before geteVoicemeeterInfo');
-    // Get Voicemeeter Info  return { name: 'Voicemeeter Potato', index: 3, version: '3.0.0.7' }
-    console.debug('Voicemeeter Info', vm.getVoicemeeterInfo());
+    console.debug('Before getVoiceMeeterInfo');
+    // Get Voicemeeter Info  return { name: 'VoiceMeeter Potato', index: 3, version: '3.0.0.7' }
+    console.debug('VoiceMeeter Info', vm.getVoiceMeeterInfo());
 
     console.debug('before getMultiParameter');
     const multiparam = await vm.getMultiParameter([
@@ -43,9 +46,9 @@ async function start() {
     // console.log(stringparam);
 
     // setInterval(() => {
-    //   // if (vm.isParametersDirty()) {
-    //   //   Loop(vm);
-    //   // }
+    //   if (vm.isParametersDirty()) {
+    //     Loop(vm);
+    //   }
     // }, 5000);
   } catch (e) {
     if (e instanceof VoiceMeeterLoginError) {
@@ -62,5 +65,5 @@ start();
 async function Loop(vm: VoiceMeeter) {
   // console.log('MIDI', ' || ', vm.getMidi());
   // console.log('Level', ' || ', vm.getLevelByID(3, 6));
-  // console.log('getAllParameter  || ', await vm.getAllParameter());
+  console.log('getAllParameter  || ', await vm.getAllParameter());
 }

@@ -1,7 +1,7 @@
-import {VoicemeeterConfig} from './voicemeeterUtils';
-import {VoicemeeterType} from './index';
+import { VoiceMeeterConfig } from './voiceMeeterUtils';
+import { VoiceMeeterType } from './index';
 
-const voicemeeterDefaultConfig:Record<VoicemeeterType, VoicemeeterConfig> = {
+const voiceMeeterDefaultConfig: Record<VoiceMeeterType, VoiceMeeterConfig> = {
   0: {
     strips: [],
     buses: [],
@@ -15,7 +15,7 @@ const voicemeeterDefaultConfig:Record<VoicemeeterType, VoicemeeterConfig> = {
       name: 'Hardware input 2',
     }, {
       id: 2,
-      name: 'Voicemeeter VAIO',
+      name: 'VoiceMeeter VAIO',
       isVirtual: true,
     }],
     buses: [{
@@ -23,7 +23,7 @@ const voicemeeterDefaultConfig:Record<VoicemeeterType, VoicemeeterConfig> = {
       name: 'Hardware output 1',
     }, {
       id: 1,
-      name: 'Voicemeeter VAIO output',
+      name: 'VoiceMeeter VAIO output',
     }],
   },
   2: {
@@ -38,11 +38,11 @@ const voicemeeterDefaultConfig:Record<VoicemeeterType, VoicemeeterConfig> = {
       name: 'Hardware input 3',
     }, {
       id: 3,
-      name: 'Voicemeeter VAIO',
+      name: 'VoiceMeeter VAIO',
       isVirtual: true,
     }, {
       id: 4,
-      name: 'Voicemeeter AUX',
+      name: 'VoiceMeeter AUX',
       isVirtual: true,
     }],
     buses: [{
@@ -57,11 +57,11 @@ const voicemeeterDefaultConfig:Record<VoicemeeterType, VoicemeeterConfig> = {
     }, {
       id: 3,
       isVirtual: true,
-      name: 'Voicemeeter VAIO output',
+      name: 'VoiceMeeter VAIO output',
     }, {
       id: 4,
       isVirtual: true,
-      name: 'Voicemeeter VAIO Aux output',
+      name: 'VoiceMeeter VAIO Aux output',
     }],
   },
   3: {
@@ -82,15 +82,15 @@ const voicemeeterDefaultConfig:Record<VoicemeeterType, VoicemeeterConfig> = {
       name: 'Hardware input 5',
     }, {
       id: 5,
-      name: 'Voicemeeter VAIO',
+      name: 'VoiceMeeter VAIO',
       isVirtual: true,
     }, {
       id: 6,
-      name: 'Voicemeeter AUX',
+      name: 'VoiceMeeter AUX',
       isVirtual: true,
     }, {
       id: 7,
-      name: 'Voicemeeter VAIO 3',
+      name: 'VoiceMeeter VAIO 3',
       isVirtual: true,
     }],
     buses: [{
@@ -111,17 +111,17 @@ const voicemeeterDefaultConfig:Record<VoicemeeterType, VoicemeeterConfig> = {
     }, {
       id: 5,
       isVirtual: true,
-      name: 'Voicemeeter VAIO output',
+      name: 'VoiceMeeter VAIO output',
     }, {
       id: 6,
       isVirtual: true,
-      name: 'Voicemeeter VAIO Aux output',
+      name: 'VoiceMeeter VAIO Aux output',
     }, {
       id: 7,
       isVirtual: true,
-      name: 'Voicemeeter VAIO3 output',
+      name: 'VoiceMeeter VAIO3 output',
     }],
   },
 };
 
-export = voicemeeterDefaultConfig
+export = voiceMeeterDefaultConfig
