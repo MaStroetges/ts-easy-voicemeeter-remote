@@ -10,19 +10,21 @@ npm install ts-easy-voicemeeter-remote --save
 
 ### How to use it ?
 
-```js
-const voicemeeter = require("easy-voicemeeter-remote");
+```ts
+import VoiceMeeter from "easy-voicemeeter-remote";
+
+const voicemeeter = new VoiceMeeter();
 
 voicemeeter.init().then(() => {
   voicemeeter.login();
 });
 ```
 
-After the login method is successful you can use all the methods to interact with the instance of Voicemeeter
+After the login method is successful you can use all the methods to interact with the instance of VoiceMeeter
 
 ### Connect and disconnect with the Voicemeeter software
 
-```js
+```ts
 // Connect
 voicemeeter.login();
 // Disconnect
@@ -31,25 +33,25 @@ voicemeeter.logout();
 
 ### Set parameters like : 'mono', 'solo', 'mute', 'gain', 'gate', 'comp' for each Strip and Bus
 
-```js
+```ts
 // Set the gain of the first Strip to -10db
-voicemeeter.setStripGain(0, -10);
+voicemeeter.setStripParameter("gain", 0, -10);
 // Mute the second Bus
-voicemeeter.setBusMute(1, true);
+voicemeeter.setBusParameter("mute", 1, true);
 ```
 
 ### Get All available Parameters form all Strips and Buses. like : 'mono', 'solo', 'mute', 'gain', 'gate', 'comp' ...
 
-```js
-console.log("getAllParameter  || ", await voicemeeter.getAllParameter());
+```ts
+console.log("getAllParameter  || ", await voicemeeter.getAllParameters());
 ```
 
 ### Get Multiple Parameters form Strips and Buses.
 
-```js
+```ts
 var data = await voicemeeter.getMultiParameter([
-  { type: "Strip", id: 0, getVals: ["mono", "Mute", "solo", "gain"] },
-  { type: "Bus", id: 0, getVals: ["Mono", "mute", "gain"] },
+  { type: InterfaceType.strip, id: 0, getVals: ["mono", "Mute", "solo", "gain"] },
+  { type: InterfaceType.bus, id: 0, getVals: ["mono", "mute", "gain"] },
 ]);
 
 console.log("getMultiParameter  || ", data);
@@ -64,7 +66,7 @@ buses: [{ type: 'bus', id: 0, mono: 0, mute: 0, gain: -18.614171981811523 }]} */
 - mode = 0= pre fader input levels. 1= post fader input levels. 2= post Mute input levels. 3= output levels.
 - index strip or bus id
 
-```js
+```ts
 voicemeeter.getLevelByID(mode, index);
 
 console.log("Level || ", voicemeeter.getLevelByID(3, 6));
@@ -72,7 +74,7 @@ console.log("Level || ", voicemeeter.getLevelByID(3, 6));
 
 ### Get Midi Data
 
-```js
+```ts
 voicemeeter.getMidi();
 
 console.log("MIDI || ", voicemeeter.getMidi());
@@ -80,7 +82,7 @@ console.log("MIDI || ", voicemeeter.getMidi());
 
 ### Get all input/output devices
 
-```js
+```ts
 // Get all devices from the DLL
 // They will be stored into an array in the voicemeeter-remote instance
 voicemeeter.updateDeviceList();
@@ -93,6 +95,8 @@ console.log(voicemeeter.outputDevices);
 #### Dependencies
 
 [`ffi-napi`][ffi] => Read and execute the VoicemeeterRemote DLL
+
+[`ref-napi`][ref-napi] => Turn Buffer instances into "pointers"
 
 [`ref-array-napi`][ref-array] => Create array (\*pointer) for `ffi` to return string from the DLL
 
@@ -119,5 +123,6 @@ MIT
 [voicemeeter-potato]: https://www.vb-audio.com/Voicemeeter/potato.htm
 [voicemeeter-api]: https://github.com/Mikatux/voicemeeter-api
 [ffi]: https://www.npmjs.com/package/ffi-napi
+[ref-napi]: https://www.npmjs.com/package/ref-napi
 [ref-array]: https://www.npmjs.com/package/ref-array
 [winreg]: https://www.npmjs.com/package/winreg

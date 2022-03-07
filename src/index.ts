@@ -429,7 +429,7 @@ export class VoiceMeeter {
     return func;
   }
 
-  public async getAllParameter(): Promise<OutParamData> {
+  public async getAllParameters(): Promise<OutParamData> {
     return new Promise((resolve, rejects) => {
       const data: OutParamData = {
         strips: <OutParam[]>[],

@@ -7,9 +7,9 @@ async function start() {
     await vm.init();
     // Login into Voicemeeter
     console.log(vm.testConnection());
-    if (!vm.testConnection()) {
-      vm.runVoiceMeeter(VoiceMeeterType.voiceMeeterPotato);
-    }
+    // if (!vm.testConnection()) {
+    //   vm.runVoiceMeeter(VoiceMeeterType.voiceMeeterPotato);
+    // }
 
     vm.login();
 
@@ -65,5 +65,5 @@ start();
 async function Loop(vm: VoiceMeeter) {
   // console.log('MIDI', ' || ', vm.getMidi());
   // console.log('Level', ' || ', vm.getLevelByID(3, 6));
-  console.log('getAllParameter  || ', await vm.getAllParameter());
+  console.log('getAllParameter  || ', await vm.getAllParameters());
 }
