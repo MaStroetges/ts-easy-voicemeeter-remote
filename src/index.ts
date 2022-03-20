@@ -523,10 +523,10 @@ export class VoiceMeeter {
   }
 
   public isMacroButtonDirty() {
-   let retVal = this.libVoiceMeeter.VBVMR_MacroButton_IsDirty();
-   if (retVal < 0) {
-     throw new VoiceMeeterDirtyError(retVal);
-   }
+    let retVal = this.libVoiceMeeter.VBVMR_MacroButton_IsDirty();
+    if (retVal < 0) {
+      throw new VoiceMeeterDirtyError(retVal);
+    }
     return retVal
   }
 
@@ -550,10 +550,10 @@ export class VoiceMeeter {
    * @returns 0 = success
    */
   public setMacroButtonStatus(index: number, value: number) {
-   let retVal = this.libVoiceMeeter.VBVMR_MacroButton_SetStatus(index, value, 0);
-   if (retVal !== 0) {
+    let retVal = this.libVoiceMeeter.VBVMR_MacroButton_SetStatus(index, value, 0);
+    if (retVal !== 0) {
       throw new VoiceMeeterMacroButtonError(retVal);
-   }
+    }
     return retVal;
   }
 
