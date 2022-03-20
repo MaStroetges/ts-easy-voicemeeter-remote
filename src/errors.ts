@@ -1,6 +1,6 @@
 export class VoiceMeeterError extends Error {
     constructor(msg: string, returnValue?: any) {
-        super(`${msg}: ${returnValue}`);
+        super(`${msg} ${returnValue ? `: ${returnValue}`: ''}`);
         Object.setPrototypeOf(this, VoiceMeeterError.prototype);
     }
 }
