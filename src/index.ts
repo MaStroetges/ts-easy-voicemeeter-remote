@@ -567,5 +567,5 @@ export class VoiceMeeter {
   }
 }
 
-export { VoiceMeeterConnectionError, VoiceMeeterDirtyError, VoiceMeeterError, VoiceMeeterGetParametersError, VoiceMeeterGetVersionError, VoiceMeeterInitializationError, VoiceMeeterLevelError, VoiceMeeterLoginError, VoiceMeeterMacroButtonError, VoiceMeeterMidiError, VoiceMeeterRunError } from './errors';
-export { VoiceMeeterInfo, StripParamName, BusParamName, VoiceMeeterGroup, IoChannels, VoiceMeeterIO, VoiceMeeterGroupTypes } from './voiceMeeterUtils';
+export * from './errors';
+export * from './voiceMeeterUtils';
