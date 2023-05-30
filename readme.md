@@ -114,6 +114,8 @@ console.log(voicemeeter.outputDevices);
 
 #### [jaggernaut555/ts-easy-voicemeeter-remote](https://github.com/jaggernaut555/ts-easy-voicemeeter-remote) forked from [steffenreimann/easy-voicemeeter-remote](https://github.com/steffenreimann/easy-voicemeeter-remote)
 
+#### [MaStroetges/ts-easy-voicemeeter-remote](https://github.com/MaStroetges/ts-easy-voicemeeter-remote) forked from [jaggernaut555/ts-easy-voicemeeter-remote](https://github.com/jaggernaut555/ts-easy-voicemeeter-remote)
+
 # License
 
 MIT
